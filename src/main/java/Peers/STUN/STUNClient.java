@@ -5,23 +5,16 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.nio.ByteBuffer;
+import java.util.Random;
 
 public class STUNClient {
 
     // Адрес STUN-сервера
     private static final String STUN_SERVER = "stun.l.google.com"; // Публичный STUN-сервер Google
     private static final int STUN_PORT = 19302;
-    public static void main(String[] args) {
-        get();
-        get();
-        get();
-    }
+    private static final Random rand = new Random();
 
-    public static void get() {
+    public String[] getMyIp() {
         // Используем try-with-resources для автоматического закрытия сокета
         try (DatagramSocket socket = new DatagramSocket()) {
 
@@ -38,46 +31,38 @@ public class STUNClient {
             byte[] responseBuffer = new byte[1024];
             DatagramPacket responsePacket = new DatagramPacket(responseBuffer, responseBuffer.length);
             socket.receive(responsePacket);
-
-            System.out.println("Ответ получен, длина ответа: " + responsePacket.getLength());
-
-            // Выводим сырые байты ответа
-            for (int i = 0; i < responsePacket.getLength(); i++) {
-                System.out.print(String.format("%02X ", responseBuffer[i]));
-            }
-            System.out.println();
-
+            System.out.println("Recieved response");
             // Парсим ответ от STUN-сервера
-            parseStunResponse(responsePacket.getData());
+            return parseStunResponse(responsePacket.getData());
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+            return null;
         }
     }
 
     // Метод создания простого STUN Binding Request
-    private static byte[] createStunRequest() {
+    private byte[] createStunRequest() {
         ByteBuffer buffer = ByteBuffer.allocate(20); // STUN Binding Request — 20 байт
         buffer.putShort((short) 0x0001); // Тип сообщения: Binding Request
         buffer.putShort((short) 0x0000); // Длина сообщения: 0 (для простого запроса)
         buffer.putInt(0x2112A442); // Magic Cookie (фиксированное значение)
-        buffer.putInt(0x63c7117e); // Транзакционный ID (случайное значение)
-        buffer.putInt(0x0714278f); // Транзакционный ID (случайное значение)
-        buffer.putInt(0x5ded3221); // Транзакционный ID (случайное значение)
+        buffer.putInt(rand.nextInt(65536)); // Транзакционный ID (случайное значение)
+        buffer.putInt(rand.nextInt(65536)); // Транзакционный ID (случайное значение)
+        buffer.putInt(rand.nextInt(65536)); // Транзакционный ID (случайное значение)
         return buffer.array();
     }
 
     // Метод для парсинга ответа STUN-сервера
-    private static void parseStunResponse(byte[] data) {
+    private String[] parseStunResponse(byte[] data) {
+        String[] result = new String[2];
         ByteBuffer buffer = ByteBuffer.wrap(data);
         buffer.getShort(); // Пропускаем тип сообщения
         buffer.getShort(); // Пропускаем длину сообщения
         buffer.getInt(); // Пропускаем Magic Cookie
 
         // Пропускаем Транзакционный ID (12 байт)
-        buffer.getInt();
-        buffer.getInt();
-        buffer.getInt();
+        buffer.get(new byte[12]);
 
         // Читаем атрибуты STUN-сообщения
         while (buffer.remaining() > 0) {
@@ -87,26 +72,59 @@ public class STUNClient {
             if (type == 0x0020) { // XOR-MAPPED-ADDRESS атрибут
                 buffer.get(); // Пропускаем первый байт (не используется)
                 byte family = buffer.get(); // IPv4 или IPv6
-                short port = buffer.getShort(); // Порт
 
-                // XOR операция для порта
-                port ^= 0x2112;
-
-                byte[] ip = new byte[4];
-                buffer.get(ip);
-
-                // XOR операция для IP-адреса
-                ip[0] ^= 0x21;
-                ip[1] ^= 0x12;
-                ip[2] ^= 0xA4;
-                ip[3] ^= 0x42;
-
-                // Выводим публичный IP-адрес и порт
-                System.out.println("Public IP: " + (ip[0] & 0xFF) + "." + (ip[1] & 0xFF) + "." + (ip[2] & 0xFF) + "." + (ip[3] & 0xFF));
-                System.out.println("Public Port: " + (port & 0xFFFF));
+                short shortPort = buffer.getShort(); // Порт
+                // XOR операция для порта (магическое число)
+                shortPort ^= 0x2112;
+                // Преобразование из short в int с сохранением первых 16 бит
+                int intPort = shortPort & 0xFFFF;
+                String ipAddress = null;
+                if (family == 0x01) {
+                    ipAddress = handleIpV4Address(buffer);
+                } else if (family == 0x02) {
+                    ipAddress = handleIpV6Address(buffer);
+                }
+                result[0] = ipAddress;
+                result[1] = Integer.toString(intPort);
+                break;
             } else {
                 buffer.position(buffer.position() + length); // Пропускаем неизвестные атрибуты
             }
         }
+        return result;
+    }
+
+    private String handleIpV4Address(ByteBuffer buffer) {
+
+        byte[] ipBytes = new byte[4];
+        buffer.get(ipBytes);
+        // XOR операция для IP-адреса(магические числа)
+        ipBytes[0] ^= 0x21;
+        ipBytes[1] ^= 0x12;
+        ipBytes[2] ^= 0xA4;
+        ipBytes[3] ^= 0x42;
+
+        return (ipBytes[0] & 0xFF) + "." + (ipBytes[1] & 0xFF) + "." + (ipBytes[2] & 0xFF) + "." + (ipBytes[3] & 0xFF);
+    }
+
+    private String handleIpV6Address(ByteBuffer buffer) {
+        byte[] ipBytes = new byte[16];
+        buffer.get(ipBytes);
+        // XOR операция для IPv6 (размер больше, магические числа не изменяются)
+        for (int i = 0; i < 16; i++) {
+            if (i % 2 == 0) {
+                ipBytes[i] ^= 0x21;
+            } else {
+                ipBytes[i] ^= 0x12;
+            }
+        }
+        // Преобразуем IP в строку для IPv6
+        StringBuilder ipAddress = new StringBuilder();
+        for (int i = 0; i < 16; i += 2) {
+            ipAddress.append(String.format("%02x", ipBytes[i] & 0xFF))
+                    .append(String.format("%02x", ipBytes[i + 1] & 0xFF));
+            if (i < 14) ipAddress.append(":");
+        }
+        return ipAddress.toString();
     }
 }

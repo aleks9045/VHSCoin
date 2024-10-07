@@ -18,7 +18,7 @@ public class Peer {
                 peerName,
                 port,
                 new ServerSocket(port),
-                Executors.newFixedThreadPool(64));
+                Executors.newSingleThreadExecutor());
     }
 
     public void start() {

@@ -2,12 +2,15 @@ import Peers.Peer;
 import java.io.IOException;
 import java.sql.Timestamp;
 import BlockChain.Block;
+import Peers.STUN.STUNClient;
 import BlockChain.Transaction;
 
 public class Main {
-    public static void main(String[] args) throws Exception {
-        fork1();
+    public static void main(String[] args) throws IOException {
+        fork2();
     }
+
+
     public static void fork1(){
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         int diff = 5;
@@ -24,8 +27,9 @@ public class Main {
 
         stable_peer1.start();
         stable_peer2.start();
-        Peer peer1 = new Peer("Peer1", 8001);
+        STUNClient stunClient = new STUNClient();
+        Peer peer1 = new Peer("Peer1", Integer.parseInt(stunClient.getMyIp()[1]));
         peer1.start();
-        peer1.sendMessage("localhost", 5001, "getAddresses");
+        peer1.sendMessage("localhost", 5001, "help");
     }
 }
