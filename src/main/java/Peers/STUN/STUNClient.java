@@ -31,7 +31,7 @@ public class STUNClient {
             byte[] responseBuffer = new byte[1024];
             DatagramPacket responsePacket = new DatagramPacket(responseBuffer, responseBuffer.length);
             socket.receive(responsePacket);
-            System.out.println("Recieved response");
+            System.out.println("Recieved STUN response.");
             // Парсим ответ от STUN-сервера
             return parseStunResponse(responsePacket.getData());
 

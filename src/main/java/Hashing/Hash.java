@@ -9,16 +9,12 @@ public class Hash {
     public static byte[] getSHA(String input) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            // digest() method called
-            // to calculate message digest of an input
-            // and return array of byte
+            // digest() method called to calculate message digest of an input and return array of byte
             return md.digest(input.getBytes(StandardCharsets.UTF_8));
         } catch (NoSuchAlgorithmException e){
             System.out.println(e.getMessage());
         } return null;
-
     }
-
     public static String toHexString(byte[] hash) {
         // Convert byte array into signum representation()
         BigInteger number = new BigInteger(1, hash);
@@ -30,7 +26,11 @@ public class Hash {
         }
         return hexString.toString();
     }
+
     public static String hash(String input){
         return toHexString(getSHA(input));
+    }
+    public static String hash(String[] input){
+        return toHexString(getSHA(String.join("", input)));
     }
 }

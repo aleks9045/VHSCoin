@@ -5,6 +5,7 @@ import Peers.DHT.KademliaNode;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
@@ -13,16 +14,19 @@ import java.util.function.Function;
 
 public class PeerThread extends Thread {
     private final String peerName;
+    private final String ipAddress;
     private final int port;
     private final ServerSocket serverSocket;
     private final ExecutorService threadPool;
-//    private final KademliaNode kademliaNode = new KademliaNode();
+    private final KademliaNode PeerKademliaNode;
     private HashMap<String, Function<Object[], Object>> commands = new HashMap<>();
     CommandProcessor commandProcessor = new CommandProcessor();
 
-    public PeerThread(String threadName, String peerName, int port, ServerSocket serverSocket, ExecutorService threadPool) {
-        super(threadName);
+    public PeerThread(String peerName, String ipAddress, int port, ServerSocket serverSocket, ExecutorService threadPool) {
+        super(peerName + " peerThread");
+        PeerKademliaNode = new KademliaNode(ipAddress, port);
         this.peerName = peerName;
+        this.ipAddress = ipAddress;
         this.port = port;
         this.serverSocket = serverSocket;
         // используем пул потоков для управления соединениями
@@ -57,6 +61,7 @@ public class PeerThread extends Thread {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
              PrintWriter out = new PrintWriter(new BufferedOutputStream(socket.getOutputStream()), true)) {
 
+            addToKadelmia(socket.getRemoteSocketAddress());
 
             String firstLine = in.readLine();
             System.out.println(peerName + " received: " + firstLine + " from " + socket.getRemoteSocketAddress());
@@ -80,6 +85,8 @@ public class PeerThread extends Thread {
 
     // Добавление стабильных нод
     private void prepareData() {
+        KademliaNode stableNode = new KademliaNode(ipAddress, port);
+        PeerKademliaNode.addNode(stableNode);
         System.out.println("Initial data prepared.");
     }
 
@@ -124,7 +131,7 @@ public class PeerThread extends Thread {
     private class CommandProcessor {
         public CommandProcessor() {
             // Пример команды без параметров
-//            commands.put("getAddresses", (args) -> adresses);
+            commands.put("getAddresses", (args) -> PeerKademliaNode.getAllNodes());
             commands.put("help", (args) -> commands);
         }
 
@@ -136,5 +143,26 @@ public class PeerThread extends Thread {
                 throw new IllegalArgumentException("Unknown command: " + command);
             }
         }
+    }
+
+    private void addToKadelmia(SocketAddress socketAddress){
+        String remoteAddress = socketAddress.toString().substring(1);
+        String remoteIpAddress;
+        int remotePort;
+
+        // Проверяем, начинается ли адрес с '[' (это будет IPv6)
+        if (remoteAddress.startsWith("[")) {
+            // Для IPv6 адреса ищем закрывающую скобку ']'
+            int indexOfClosingBracket = remoteAddress.indexOf("]");
+            remoteIpAddress = remoteAddress.substring(1, indexOfClosingBracket); // IP без скобок
+            remotePort = Integer.parseInt(remoteAddress.substring(indexOfClosingBracket + 2)); // Порт после ']:'
+        } else {
+            // Для IPv4 просто разбиваем по двоеточию
+            String[] parts = remoteAddress.split(":");
+            remoteIpAddress = parts[0];
+            remotePort = Integer.parseInt(parts[1]);
+        }
+        KademliaNode newNode = new KademliaNode(remoteIpAddress, remotePort);
+        PeerKademliaNode.addNode(newNode);
     }
 }

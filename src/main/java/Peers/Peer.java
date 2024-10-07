@@ -10,12 +10,12 @@ public class Peer {
     private final String peerName;
     private final PeerThread peerThread;
 
-    public Peer(String peerName, int port) throws IOException {
+    public Peer(String peerName, String ipAddress, int port) throws IOException {
         this.peerName = peerName;
         // Кастомный класс потока для запуска пира
         this.peerThread = new PeerThread(
-                peerName + " peerThread",
                 peerName,
+                ipAddress,
                 port,
                 new ServerSocket(port),
                 Executors.newSingleThreadExecutor());

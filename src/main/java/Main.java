@@ -22,14 +22,14 @@ public class Main {
         block2.printData();
     }
     public static void fork2() throws IOException {
-        Peer stable_peer1 = new Peer("StablePeer1", 5001);
-        Peer stable_peer2 = new Peer("StablePeer2", 5002);
-
-        stable_peer1.start();
-        stable_peer2.start();
         STUNClient stunClient = new STUNClient();
-        Peer peer1 = new Peer("Peer1", Integer.parseInt(stunClient.getMyIp()[1]));
+        String[] myIpNPort = stunClient.getMyIp();
+        Peer stable_peer = new Peer("StablePeer", myIpNPort[0], Integer.parseInt(myIpNPort[1]));
+        stable_peer.start();
+
+        Peer peer1 = new Peer("Peer1", "localhost",8001);
         peer1.start();
-        peer1.sendMessage("localhost", 5001, "help");
+        peer1.sendMessage("localhost", Integer.parseInt(myIpNPort[1]), "getAddresses");
+        peer1.sendMessage("localhost", Integer.parseInt(myIpNPort[1]), "getAddresses");
     }
 }
