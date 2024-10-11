@@ -31,7 +31,7 @@ public class Peer {
 
     public void stop() {
         if (peerThread.isAlive()) {
-            peerThread.shutdownThreadPool(); // Прерываение пула потоков
+            peerThread.shutdownThreadPool(); // Прерывание пула потоков
             peerThread.interrupt();  // Прерывание потока
         }
     }

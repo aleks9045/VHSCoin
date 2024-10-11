@@ -1,10 +1,15 @@
+import com.google.protobuf.gradle.GenerateProtoTask
+
 plugins {
     id 'java'
     id 'application'
+    id "com.google.protobuf" version "0.9.4"
 }
 application {
     mainClass = "Main"
+    applicationDefaultJvmArgs = ['-Dfile.encoding=UTF-8']
 }
+
 //group = 'org.example'
 //version = '1.0'
 
@@ -17,4 +22,31 @@ repositories {
 
 
 dependencies {
+    implementation 'com.google.protobuf:protobuf-java:4.28.2'
+}
+
+sourceSets {
+    main {
+        proto {
+            srcDir 'src/main/proto'
+        }
+        java {
+            srcDir 'src/main/java'
+        }
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:4.28.2'
+    }
+    generateProtoTasks {
+        ofSourceSet('main')
+    }
+}
+
+tasks.withType(Copy) {
+    filesMatching("**/*.proto") {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
 }

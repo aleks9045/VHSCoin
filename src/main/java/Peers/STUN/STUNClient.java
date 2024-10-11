@@ -1,8 +1,9 @@
 package Peers.STUN;
 
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 
 import java.util.Random;
@@ -10,30 +11,34 @@ import java.util.Random;
 public class STUNClient {
 
     // Адрес STUN-сервера
-    private static final String STUN_SERVER = "stun.l.google.com"; // Публичный STUN-сервер Google
-    private static final int STUN_PORT = 19302;
+    private static final String TURN_SERVER = "localhost"; // адрес TURN-сервера
+    private static final int TURN_PORT = 3478;             // порт TURN-сервера (обычно 3478 для TCP)
     private static final Random rand = new Random();
 
     public String[] getMyIp() {
         // Используем try-with-resources для автоматического закрытия сокета
-        try (DatagramSocket socket = new DatagramSocket()) {
+        try (Socket socket = new Socket(TURN_SERVER, TURN_PORT)) {
 
-            // STUN запрос: создаем запрос Binding Request
-            byte[] stunRequest = createStunRequest();
+            System.out.println("Connected to TURN server at " + TURN_SERVER + ":" + TURN_PORT);
 
-            // Отправляем запрос STUN-серверу
-            InetAddress address = InetAddress.getByName(STUN_SERVER);
-            DatagramPacket requestPacket = new DatagramPacket(stunRequest, stunRequest.length, address, STUN_PORT);
-            socket.send(requestPacket);
-            System.out.println("STUN sended query to " + STUN_SERVER + ":" + STUN_PORT);
+            // Открываем потоки ввода/вывода
+            InputStream input = socket.getInputStream();
+            OutputStream output = socket.getOutputStream();
 
-            // Получаем ответ от STUN-сервера
+            // Создаем STUN Binding Request (Allocate Request)
+            byte[] request = createRequest();
+            System.out.println("Sending Allocate Request...");
+
+            // Отправляем запрос на TURN-сервер
+            output.write(request);
+            output.flush();
+
+            // Читаем ответ от сервера
             byte[] responseBuffer = new byte[1024];
-            DatagramPacket responsePacket = new DatagramPacket(responseBuffer, responseBuffer.length);
-            socket.receive(responsePacket);
-            System.out.println("Recieved STUN response.");
+            int bytesRead = input.read(responseBuffer);
+
             // Парсим ответ от STUN-сервера
-            return parseStunResponse(responsePacket.getData());
+            return parseResponse(responseBuffer);
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -42,7 +47,7 @@ public class STUNClient {
     }
 
     // Метод создания простого STUN Binding Request
-    private byte[] createStunRequest() {
+    private byte[] createRequest() {
         ByteBuffer buffer = ByteBuffer.allocate(20); // STUN Binding Request — 20 байт
         buffer.putShort((short) 0x0001); // Тип сообщения: Binding Request
         buffer.putShort((short) 0x0000); // Длина сообщения: 0 (для простого запроса)
@@ -54,7 +59,7 @@ public class STUNClient {
     }
 
     // Метод для парсинга ответа STUN-сервера
-    private String[] parseStunResponse(byte[] data) {
+    private String[] parseResponse(byte[] data) {
         String[] result = new String[2];
         ByteBuffer buffer = ByteBuffer.wrap(data);
         buffer.getShort(); // Пропускаем тип сообщения
@@ -79,8 +84,10 @@ public class STUNClient {
                 // Преобразование из short в int с сохранением первых 16 бит
                 int intPort = shortPort & 0xFFFF;
                 String ipAddress = null;
+
                 if (family == 0x01) {
                     ipAddress = handleIpV4Address(buffer);
+
                 } else if (family == 0x02) {
                     ipAddress = handleIpV6Address(buffer);
                 }
