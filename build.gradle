@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.8'
     id "com.google.protobuf" version "0.9.4"
 }
 application {
@@ -8,19 +9,26 @@ application {
     applicationDefaultJvmArgs = ['-Dfile.encoding=UTF-8']
 }
 
-//group = 'org.example'
-//version = '1.0'
 
 compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
+
+
 
 repositories {
     mavenCentral()
 }
 
 
+
 dependencies {
     implementation 'com.google.protobuf:protobuf-java:4.28.2'
+    implementation group: 'org.openjfx', name: 'javafx', version: '11', ext: 'pom'
+}
+
+javafx {
+    version = "11.0.2"
+    modules = [ 'javafx.controls' ]
 }
 
 sourceSets {

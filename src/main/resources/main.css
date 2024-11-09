@@ -1,0 +1,25 @@
+
+/* Применяем шрифт ко всем меткам и кнопкам */
+.label, .button {
+    font-size: 16px;
+    color: white; /* Пример цвета для текста */
+}
+
+/* Настройки для GridPane */
+.grid-pane {
+    background-color: #333;
+    padding: 10px;
+}
+
+/* Стили для кнопок */
+.button {
+    background-color: #444;
+    border: 1px solid #666;
+    padding: 10px;
+}
+
+/* Стили для меток */
+.label {
+    background-color: #555;
+    padding: 5px;
+}
