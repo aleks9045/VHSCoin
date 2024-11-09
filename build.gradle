@@ -1,12 +1,24 @@
+import com.google.protobuf.gradle.GenerateProtoTask
+
 plugins {
     id 'java'
     id 'application'
+<<<<<<< HEAD
     id 'org.openjfx.javafxplugin' version '0.0.8'
+=======
+    id "com.google.protobuf" version "0.9.4"
+>>>>>>> ee045c2db0df6574e2db1cacbadb0d2d4ae63600
 }
 application {
     mainClass = "Main"
+    applicationDefaultJvmArgs = ['-Dfile.encoding=UTF-8']
 }
 
+<<<<<<< HEAD
+=======
+//group = 'org.example'
+//version = '1.0'
+>>>>>>> ee045c2db0df6574e2db1cacbadb0d2d4ae63600
 
 compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
@@ -20,10 +32,40 @@ repositories {
 
 
 dependencies {
+<<<<<<< HEAD
     implementation group: 'org.openjfx', name: 'javafx', version: '11', ext: 'pom'
 }
 
 javafx {
     version = "11.0.2"
     modules = [ 'javafx.controls' ]
+=======
+    implementation 'com.google.protobuf:protobuf-java:4.28.2'
+>>>>>>> ee045c2db0df6574e2db1cacbadb0d2d4ae63600
+}
+
+sourceSets {
+    main {
+        proto {
+            srcDir 'src/main/proto'
+        }
+        java {
+            srcDir 'src/main/java'
+        }
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:4.28.2'
+    }
+    generateProtoTasks {
+        ofSourceSet('main')
+    }
+}
+
+tasks.withType(Copy) {
+    filesMatching("**/*.proto") {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
 }

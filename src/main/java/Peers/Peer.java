@@ -10,15 +10,15 @@ public class Peer {
     private final String peerName;
     private final PeerThread peerThread;
 
-    public Peer(String peerName, int port) throws IOException {
+    public Peer(String peerName, String ipAddress, int port) throws IOException {
         this.peerName = peerName;
         // Кастомный класс потока для запуска пира
         this.peerThread = new PeerThread(
-                peerName + " peerThread",
                 peerName,
+                ipAddress,
                 port,
                 new ServerSocket(port),
-                Executors.newFixedThreadPool(64));
+                Executors.newSingleThreadExecutor());
     }
 
     public void start() {
@@ -31,7 +31,7 @@ public class Peer {
 
     public void stop() {
         if (peerThread.isAlive()) {
-            peerThread.shutdownThreadPool(); // Прерываение пула потоков
+            peerThread.shutdownThreadPool(); // Прерывание пула потоков
             peerThread.interrupt();  // Прерывание потока
         }
     }

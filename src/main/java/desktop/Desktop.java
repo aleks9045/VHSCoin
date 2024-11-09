@@ -14,7 +14,7 @@ public class Desktop extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        // Загружаем шрифт и сразу применяем
+        // Загружаем шрифт прямо в Java
         Font font = Font.loadFont(getClass().getResource("/vhs.ttf").toExternalForm(), 16);
 
         // Создаем layout
@@ -60,7 +60,8 @@ public class Desktop extends Application {
         // Создаем сцену
         Scene scene = new Scene(grid, 872, 492);
 
-
+        // Подключаем CSS для других стилей (например, фон, отступы и т.д.)
+        scene.getStylesheets().add(getClass().getResource("/main.css").toExternalForm());
 
         // Настройка окна
         primaryStage.setTitle("JavaFX Приложение с тремя колонками");

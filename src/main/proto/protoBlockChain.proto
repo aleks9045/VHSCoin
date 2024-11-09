@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_outer_classname = "BlockchainProto"; // Внешний класс
+
+// Сообщение для блока данных блокчейна
+message ProtoBlock {
+  string hash = 1;         // Хеш текущего блока
+  string previousHash = 2; // Хеш предыдущего блока
+  string data = 3;         // Данные внутри блока
+  string timestamp = 4;    // Время создания блока
+  int32 difficulty = 5;
+  int32 nonce = 6;
+}
+
+// Сообщение для всего блокчейна
+message ProtoBlockchain {
+  repeated ProtoBlock blocks = 1; // Список блоков в блокчейне
+}
