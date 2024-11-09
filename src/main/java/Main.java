@@ -3,8 +3,6 @@ import Blockchain.Protos.ProtoBlock;
 import Blockchain.Protos.ProtoBlockchain;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import BlockChain.Block;
 import desktop.Desktop;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +10,7 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        fork1(args);
+        fork2();
     }
     public static void fork1(String[] args) {
 //        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
