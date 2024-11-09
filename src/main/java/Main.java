@@ -3,24 +3,20 @@ import Peers.Peer;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-<<<<<<< HEAD
 import BlockChain.Block;
 import desktop.Desktop;
-=======
 import java.util.ArrayList;
 import java.util.List;
 
->>>>>>> ee045c2db0df6574e2db1cacbadb0d2d4ae63600
 import BlockChain.Transaction;
 import Peers.STUN.STUNClient;
 
 
 public class Main {
-<<<<<<< HEAD
     public static void main(String[] args) throws Exception {
         fork1(args);
     }
-    public static void fork1(String[] args){
+    public static void fork1(String[] args) {
 //        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 //        int diff = 5;
 //        Block block1 = new Block("a", "0", timestamp.getTime(), diff);
@@ -29,27 +25,9 @@ public class Main {
 //        System.out.println("");
 //        Block block2 = new Block("b", prevHash, timestamp.getTime(), diff);
 //        block2.printData();
-          Desktop app = new Desktop();
-          app.main(args);
-=======
-    public static void main(String[] args) throws IOException {
-        fork2();
-
+        Desktop app = new Desktop();
+        app.main(args);
     }
-
-
-    public static void fork1() {
-        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        int diff = 5;
-        Block block1 = new Block("a", "0", timestamp.getTime(), diff);
-        block1.printData();
-        String prevHash = block1.getHash();
-        System.out.println("");
-        Block block2 = new Block("b", prevHash, timestamp.getTime(), diff);
-        block2.printData();
->>>>>>> ee045c2db0df6574e2db1cacbadb0d2d4ae63600
-    }
-
     public static void fork2() throws IOException {
 //        STUNClient stunClient = new STUNClient();
 //        String[] myIpNPort = stunClient.getMyIp();
