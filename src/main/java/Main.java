@@ -1,13 +1,11 @@
-import BlockChain.Block;
-import Peers.Peer;
+import Blockchain.Block;
+import Blockchain.Protos.ProtoBlock;
+import Blockchain.Protos.ProtoBlockchain;
 
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-
-import BlockChain.Transaction;
-import Peers.STUN.STUNClient;
 
 
 public class Main {
@@ -44,7 +42,7 @@ public class Main {
                 .setPreviousHash("0")
                 .setData("Первый блок")
                 .setTimestamp("2024-10-06T12:00:00Z")
-                .setDifficulty(3)
+                .setDifficulty(5)
                 .setNonce(12345)
                 .build();
 
@@ -54,7 +52,7 @@ public class Main {
                 .setPreviousHash(block1.getHash())
                 .setData("Второй блок")
                 .setTimestamp("2024-10-06T12:05:00Z")
-                .setDifficulty(3)
+                .setDifficulty(5)
                 .setNonce(67890)
                 .build();
 

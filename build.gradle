@@ -1,5 +1,3 @@
-import com.google.protobuf.gradle.GenerateProtoTask
-
 plugins {
     id 'java'
     id 'application'
@@ -41,7 +39,7 @@ protobuf {
         artifact = 'com.google.protobuf:protoc:4.28.2'
     }
     generateProtoTasks {
-        ofSourceSet('main')
+//        ofSourceSet('main')
     }
 }
 

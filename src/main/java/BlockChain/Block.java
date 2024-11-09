@@ -1,4 +1,5 @@
-package BlockChain;
+package Blockchain;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 

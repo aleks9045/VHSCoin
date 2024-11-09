@@ -1,4 +1,4 @@
-package BlockChain;
+package Blockchain;
 
 public class Transaction {
     private String sender;
