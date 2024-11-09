@@ -1,0 +1,9 @@
+@font-face {
+    font-family: "VHSFont";
+    src: url("/vhs.ttf") format("truetype");
+}
+
+.label, .button {
+    font-family: "VHSFont", sans-serif;
+    font-size: 16px;
+}
