@@ -1,19 +1,20 @@
-import Blockchain.Block;
 import Blockchain.Protos.ProtoBlock;
 import Blockchain.Protos.ProtoBlockchain;
+import Desktop.Desktop;
 
 import java.io.IOException;
 
+
 import Peers.Peer;
 import Peers.TURN.TURNClient;
-import desktop.Desktop;
+
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        fork2();
+        fork1(args);
     }
     public static void fork1(String[] args) {
 //        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
