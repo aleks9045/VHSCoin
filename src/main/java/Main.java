@@ -1,21 +1,16 @@
-import Blockchain.Protos.ProtoBlock;
-import Blockchain.Protos.ProtoBlockchain;
 import Desktop.Desktop;
 
 import java.io.IOException;
 
 
-import Peers.Peer;
-import Peers.TURN.TURNClient;
-
-import java.util.ArrayList;
-import java.util.List;
+import Peers.STUN.STUNClient;
 
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        fork1(args);
+        fork2();
     }
+
     public static void fork1(String[] args) {
 //        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 //        int diff = 5;
@@ -28,9 +23,10 @@ public class Main {
         Desktop app = new Desktop();
         app.main(args);
     }
-    public static void fork2() throws IOException {
-        TURNClient turnClient = new TURNClient();
-        turnClient.sendAllocateRequest();
+
+    public static void fork2() throws Exception {
+        STUNClient STUNClient = new STUNClient();
+        STUNClient.sendBindingRequest();
 //        System.out.println(myIpNPort[0] + " " + myIpNPort[1]);
 //        Peer stable_peer = new Peer("StablePeer", myIpNPort[0], Integer.parseInt(myIpNPort[1]));
 //        stable_peer.start();
