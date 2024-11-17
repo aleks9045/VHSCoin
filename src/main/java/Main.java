@@ -1,9 +1,7 @@
 import Desktop.Desktop;
 
-import java.io.IOException;
 
-
-import Peers.STUN.STUNClient;
+import Net.Peer;
 
 
 public class Main {
@@ -25,16 +23,19 @@ public class Main {
     }
 
     public static void fork2() throws Exception {
-        STUNClient STUNClient = new STUNClient();
-        STUNClient.sendBindingRequest();
 //        System.out.println(myIpNPort[0] + " " + myIpNPort[1]);
 //        Peer stable_peer = new Peer("StablePeer", myIpNPort[0], Integer.parseInt(myIpNPort[1]));
 //        stable_peer.start();
 
-//        Peer peer1 = new Peer("Peer1", "localhost",8001);
-//        peer1.start();
-//        peer1.sendMessage("localhost", Integer.parseInt(myIpNPort[1]), "getAddresses");
-//        peer1.sendMessage("localhost", Integer.parseInt(myIpNPort[1]), "getAddresses");
+        Peer peer1 = new Peer("Peer1", "localhost",5001);
+        Peer peer2 = new Peer("Peer2", "localhost",5002);
+
+        peer1.start();
+        peer2.start();
+        Thread.sleep(50);
+
+        peer2.sendMessageToSS("Peer1", "hello");
+
 //        ProtoBlock block1 = ProtoBlock.newBuilder()
 //                .setHash("0000000000000000")
 //                .setPreviousHash("0")

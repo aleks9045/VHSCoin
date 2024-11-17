@@ -1,4 +1,4 @@
-package Peers.STUN;
+package Net.STUN;
 
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;

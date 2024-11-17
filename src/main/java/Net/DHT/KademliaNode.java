@@ -1,4 +1,4 @@
-package Peers.DHT;
+package Net.DHT;
 
 import java.math.BigInteger;
 import java.util.*;

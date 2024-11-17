@@ -1,6 +1,6 @@
-package Peers;
+package Net.Peers;
 
-import Peers.DHT.KademliaNode;
+import Net.DHT.KademliaNode;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-public class PeerThread extends Thread {
+public class PeerClient extends Thread {
     private final String peerName;
     private final String ipAddress;
     private final int port;
@@ -22,7 +22,7 @@ public class PeerThread extends Thread {
     private HashMap<String, Function<Object[], Object>> commands = new HashMap<>();
     CommandProcessor commandProcessor = new CommandProcessor();
 
-    public PeerThread(String peerName, String ipAddress, int port, ServerSocket serverSocket, ExecutorService threadPool) {
+    public PeerClient(String peerName, String ipAddress, int port, ServerSocket serverSocket, ExecutorService threadPool) {
         super(peerName + " peerThread");
         PeerKademliaNode = new KademliaNode(ipAddress, port);
         this.peerName = peerName;
@@ -48,7 +48,7 @@ public class PeerThread extends Thread {
 
             } catch (SocketException e) {
                 // Исключение возникает при закрытии ServerSocket
-                System.out.println(peerName + ": Server socket closed, because stopping thread.");
+                System.err.println(peerName + ": Server socket closed, because stopping thread.");
                 break;
             } catch (IOException e) {
                 System.err.println(peerName + ": Error handling client: " + e.getMessage());
@@ -69,7 +69,7 @@ public class PeerThread extends Thread {
             Object response = executeCommand(firstLine);
 
             out.println(response.toString());
-            out.flush(); // На всякий случай
+            out.flush();
             System.out.println(peerName + " sent answer: " + response + " to " + socket.getRemoteSocketAddress());
 
         } catch (IOException e) {
@@ -100,7 +100,7 @@ public class PeerThread extends Thread {
         }
         threadPool.shutdown();
         try {
-            if (!threadPool.awaitTermination(10, TimeUnit.SECONDS)) {
+            if (!threadPool.awaitTermination(1, TimeUnit.SECONDS)) {
                 threadPool.shutdownNow();
             }
         } catch (InterruptedException e) {

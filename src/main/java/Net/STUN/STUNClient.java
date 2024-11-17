@@ -1,9 +1,8 @@
-package Peers.STUN;
+package Net.STUN;
 
 import javax.net.ssl.*;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
