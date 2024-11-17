@@ -1,4 +1,6 @@
-package Blockchain;
+package BlockChain.Block;
+
+import BlockChain.Transaction.TransactionPull.TransactionPull;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -6,12 +8,12 @@ import java.security.NoSuchAlgorithmException;
 public class Block {
     private String hash;
     private String previousHash;
-    private String data;
+    private TransactionPull data;
     private long timeStamp;
     private int difficulty;
     private int nonce;
 
-    public Block(String data, String previousHash, long timeStamp, int difficulty) {
+    public Block(TransactionPull data, String previousHash, long timeStamp, int difficulty) {
         this.data = data;
         this.previousHash = previousHash;
         this.timeStamp = timeStamp;
@@ -54,7 +56,27 @@ public class Block {
         return "";
     }
 
-    public String getHash(){
+    public String getHash() {
         return hash;
+    }
+
+    public String getPreviousHash() {
+        return previousHash;
+    }
+
+    public TransactionPull getData() {
+        return data;
+    }
+
+    public long getTimeStamp() {
+        return timeStamp;
+    }
+
+    public int getDifficulty() {
+        return difficulty;
+    }
+
+    public int getNonce() {
+        return nonce;
     }
 }

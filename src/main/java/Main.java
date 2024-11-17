@@ -1,6 +1,8 @@
-import Desktop.Desktop;
+import BlockChain.Block.Block;
+import BlockChain.Transaction.Transaction;
+import BlockChain.Transaction.TransactionPull.TransactionPull;
 
-import java.io.IOException;
+import java.sql.Timestamp;
 
 
 import Peers.STUN.STUNClient;
@@ -8,10 +10,10 @@ import Peers.STUN.STUNClient;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        fork2();
+        fork1();
     }
 
-    public static void fork1(String[] args) {
+    public static void fork1() {
 //        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 //        int diff = 5;
 //        Block block1 = new Block("a", "0", timestamp.getTime(), diff);
@@ -19,9 +21,7 @@ public class Main {
 //        String prevHash = block1.getHash();
 //        System.out.println("");
 //        Block block2 = new Block("b", prevHash, timestamp.getTime(), diff);
-//        block2.printData();
-        Desktop app = new Desktop();
-        app.main(args);
+
     }
 
     public static void fork2() throws Exception {
