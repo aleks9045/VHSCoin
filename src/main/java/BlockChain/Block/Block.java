@@ -1,9 +1,11 @@
 package BlockChain.Block;
 
+import BlockChain.Transaction.Transaction;
 import BlockChain.Transaction.TransactionPull.TransactionPull;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import BlockChain.BlockChainUtils.BlockChainUtils;
 
 public class Block {
     private String hash;
@@ -22,38 +24,41 @@ public class Block {
         mineBlock();
     }
 
-    public String calculateHash() {
-        String input = previousHash + Long.toString(timeStamp) + Integer.toString(nonce) + data;
-        MessageDigest digest;
-        try {
-            digest = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = digest.digest(input.getBytes());
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : hashBytes) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public void mineBlock() {
         String target = new String(new char[difficulty]).replace('\0', '0');
         while (!hash.substring(0, difficulty).equals(target)) {
             nonce++;
-            hash = calculateHash();
+            hash = this.calculateHash();
         }
     }
 
-    public String printData() {
+    public String calculateHash() {
+        BlockChainUtils utils = new BlockChainUtils();
+        StringBuilder inputBuilder = new StringBuilder();
+
+        // Добавляем базовую информацию блока
+        inputBuilder.append(previousHash)
+                .append(timeStamp)
+                .append(nonce);
+
+        // Добавляем информацию из каждой транзакции
+        for (Transaction transaction : data.getAllTransactions()) {
+            inputBuilder.append(transaction.getSender())
+                    .append(transaction.getRecipient())
+                    .append(transaction.getTimeStamp())
+                    .append(transaction.getAmount())
+                    .append(transaction.getAccess());
+        }
+
+        return utils.calculateHash(inputBuilder.toString());
+    }
+
+
+    public void printData() {
         System.out.println("Time: " + timeStamp);
         System.out.println("Hash: " + hash);
         System.out.println("PrHash: " + previousHash);
         System.out.println("Data: " + data);
-        return "";
     }
 
     public String getHash() {

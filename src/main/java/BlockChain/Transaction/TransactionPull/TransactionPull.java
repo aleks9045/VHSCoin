@@ -26,7 +26,7 @@ public class TransactionPull {
 
     // Метод для получения всех транзакций
     public List<Transaction> getAllTransactions() {
-        return new ArrayList<>(transactions);
+        return transactions;
     }
 
     // Метод для вывода всех транзакций в консоль

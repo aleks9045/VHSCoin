@@ -5,6 +5,11 @@ import BlockChain.Transaction.Transaction;
 import BlockChain.Transaction.TransactionPull.TransactionPull;
 import BlockChain.BlockChain;
 
+import javax.crypto.Cipher;
+import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 import java.util.List;
 
 
@@ -99,7 +104,6 @@ public class BlockChainUtils {
         }
     }
 
-
     private void removeProcessedTransactionsFromPool() {
         List<Block> chain = blockChain.getChain();
         List<Transaction> allTransactions = transactionPull.getAllTransactions();
@@ -116,4 +120,52 @@ public class BlockChainUtils {
         }
     }
 
+
+    public static String encryptWithPrivateKey(String message, String privateKeyString) throws Exception {
+        PrivateKey privateKey = convertStringToPrivateKey(privateKeyString); // Конвертируем строку в PrivateKey
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.ENCRYPT_MODE, privateKey);
+        byte[] encryptedBytes = cipher.doFinal(message.getBytes());
+        return Base64.getEncoder().encodeToString(encryptedBytes); // Кодируем в Base64 для удобства
+    }
+
+    public static String decryptWithPublicKey(String encryptedMessage, String publicKeyString) throws Exception {
+        PublicKey publicKey = convertStringToPublicKey(publicKeyString); // Конвертируем строку в PublicKey
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.DECRYPT_MODE, publicKey);
+        byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedMessage));
+        return new String(decryptedBytes);
+    }
+
+    private static PublicKey convertStringToPublicKey(String publicKeyString) throws Exception {
+        byte[] keyBytes = Base64.getDecoder().decode(publicKeyString); // Декодируем строку Base64 в байты
+        X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes); // Создаём спецификацию ключа
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        return keyFactory.generatePublic(spec); // Генерируем PublicKey из спецификации
+    }
+
+    private static PrivateKey convertStringToPrivateKey(String privateKeyString) throws Exception {
+        byte[] keyBytes = Base64.getDecoder().decode(privateKeyString); // Декодируем строку Base64 в байты
+        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes); // Создаём спецификацию ключа
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        return keyFactory.generatePrivate(spec); // Генерируем PrivateKey из спецификации
+    }
+
+    public static String calculateHash(String input) {
+
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = digest.digest(input.getBytes());
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hashBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

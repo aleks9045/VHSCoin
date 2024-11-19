@@ -12,14 +12,12 @@ public class BlockChain {
     // Конструктор
     public BlockChain() {
         this.chain = new ArrayList<>();
-        // Создаем генезис-блок
-        chain.add(createGenesisBlock());
     }
 
     // Метод для создания генезис-блока
-    private Block createGenesisBlock() {
+    public Block createGenesisBlock() {
         TransactionPull pull = new TransactionPull();
-        return new Block(pull, "0", System.currentTimeMillis(), 2);
+        return new Block(pull, "0", 0, 0);
     }
 
     // Метод для получения последнего блока
