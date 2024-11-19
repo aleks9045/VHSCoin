@@ -1,8 +1,14 @@
 import BlockChain.Block.Block;
+import BlockChain.BlockChain;
 import BlockChain.Transaction.Transaction;
 import BlockChain.Transaction.TransactionPull.TransactionPull;
+import BlockChain.WalletGenerator.WalletGenerator;
+import BlockChain.BlockChainUtils.BlockChainUtils;
 
 import Net.Peer;
+
+import java.security.KeyPair;
+import java.sql.Timestamp;
 
 
 public class Main {
@@ -11,14 +17,27 @@ public class Main {
     }
 
     public static void fork1() {
-//        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-//        int diff = 5;
-//        Block block1 = new Block("a", "0", timestamp.getTime(), diff);
-//        block1.printData();
-//        String prevHash = block1.getHash();
-//        System.out.println("");
-//        Block block2 = new Block("b", prevHash, timestamp.getTime(), diff);
 
+        WalletGenerator walletGen = new WalletGenerator();
+        try {
+            KeyPair wallet = walletGen.generateWallet();
+            String publicKey = walletGen.encodeKeyToBase64(wallet.getPublic().getEncoded());
+            String privateKey = walletGen.encodeKeyToBase64(wallet.getPrivate().getEncoded());
+            BlockChainUtils utils = new BlockChainUtils();
+            Transaction t1 = new Transaction(publicKey, "heth28y8923hjfh3", 20, 2, privateKey);
+
+            String access = utils.decryptWithPublicKey(t1.getAccess(), publicKey);
+            String res = utils.calculateHash(t1.getFeilds());
+            boolean a = (res.equals(access));
+            System.out.println(a);
+
+
+        } catch (Exception e) {
+            System.err.println("Ошибка: " + e.getMessage());
+        }
+//        BlockChainUtils utils = new BlockChainUtils();
+//        utils.blockChain.addBlock(utils.blockChain.createGenesisBlock());
+//        System.out.println(utils.blockChain.getLatestBlock().getHash());
     }
 
     public static void fork2() throws Exception {
