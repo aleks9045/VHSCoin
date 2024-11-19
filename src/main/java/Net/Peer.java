@@ -1,10 +1,6 @@
 package Net;
 
-import Net.Peers.PeerClient;
-import Net.Signaling.SignalingClient;
-
 import java.io.*;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.Executors;
 
@@ -12,41 +8,26 @@ import java.util.concurrent.Executors;
 public class Peer {
     private final String peerName;
     private final PeerClient peerClient;
-    private final SignalingClient signalingClient;
 
-    public Peer(String peerName, String ipAddress, int port) throws IOException {
+
+    public Peer(String peerName) {
         this.peerName = peerName;
-
-        this.signalingClient = new SignalingClient(peerName);
 
         this.peerClient = new PeerClient(
                 peerName,
-                ipAddress,
-                port,
-                new ServerSocket(port),
                 Executors.newSingleThreadExecutor());
     }
 
-
-    public void connectToSS() {
-        if (!signalingClient.isAlive()) {
-            peerClient.start();
-        } else {
-            System.out.println("Thread already running.");
-        }
-    }
-
-    public void sendMessageToSS(String targetId, String message) {
-        signalingClient.sendMessage(targetId, message);
-    }
-
-    public String getLastMessageFromSS() {
-        return signalingClient.getLastMessage();
-    }
+//    public void sendMessageToSS(String targetId, String message) {
+//        peerClient.sendMessage(targetId, message);
+//    }
+//
+//    public String getLastMessageFromSS() {
+//        return signalClient.getLastMessage();
+//    }
 
     public void start() {
-        if (!peerClient.isAlive() && !signalingClient.isAlive()) {  // Проверяем, не был ли поток уже запущен
-            signalingClient.start();
+        if (!peerClient.isAlive()) {  // Проверяем, не был ли поток уже запущен
             peerClient.start();
         } else {
             System.out.println("Threads already running.");
@@ -54,11 +35,10 @@ public class Peer {
     }
 
     public void stop() {
-        if (peerClient.isAlive() || signalingClient.isAlive()) {
+        if (peerClient.isAlive()) {
             peerClient.shutdownThreadPool(); // Прерывание пула потоков
+            peerClient.disconnectFromSS();
             peerClient.interrupt();
-            signalingClient.disconnect();
-            signalingClient.interrupt();
         }
     }
 

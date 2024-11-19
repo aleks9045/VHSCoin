@@ -1,13 +1,17 @@
 import BlockChain.Block.Block;
 import BlockChain.Transaction.Transaction;
 import BlockChain.Transaction.TransactionPull.TransactionPull;
-
 import Net.Peer;
+
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        fork1();
+        fork2();
     }
 
     public static void fork1() {
@@ -22,50 +26,17 @@ public class Main {
     }
 
     public static void fork2() throws Exception {
-//        System.out.println(myIpNPort[0] + " " + myIpNPort[1]);
-//        Peer stable_peer = new Peer("StablePeer", myIpNPort[0], Integer.parseInt(myIpNPort[1]));
-//        stable_peer.start();
 
-        Peer peer1 = new Peer("Peer1", "localhost",5001);
-        Peer peer2 = new Peer("Peer2", "localhost",5002);
+//        Peer peer1 = new Peer("Peer1");
+//        Peer peer2 = new Peer("Peer2");
 
-        peer1.start();
-        peer2.start();
-        Thread.sleep(50);
+//        peer1.start();
+//        peer2.start();
+//        Thread.sleep(100);
 
-        peer2.sendMessageToSS("Peer1", "hello");
+//        peer1.sendMessageToSS("Peer2", "hellooooooooooooooo");
+//        peer2.sendMessageToSS("Peer1", "hello");
 
-//        ProtoBlock block1 = ProtoBlock.newBuilder()
-//                .setHash("0000000000000000")
-//                .setPreviousHash("0")
-//                .setData("Первый блок")
-//                .setTimestamp("2024-10-06T12:00:00Z")
-//                .setDifficulty(5)
-//                .setNonce(12345)
-//                .build();
-//
-//        // Создаем второй блок
-//        ProtoBlock block2 = ProtoBlock.newBuilder()
-//                .setHash("000000000000001")
-//                .setPreviousHash(block1.getHash())
-//                .setData("Второй блок")
-//                .setTimestamp("2024-10-06T12:05:00Z")
-//                .setDifficulty(5)
-//                .setNonce(67890)
-//                .build();
-//
-//        // Создаем блокчейн и добавляем блоки
-//        List<ProtoBlock> blockList = new ArrayList<>();
-//        blockList.add(block1);
-//        blockList.add(block2);
-//
-//        ProtoBlockchain blockchain = ProtoBlockchain.newBuilder()
-//                .addAllBlocks(blockList)
-//                .build();
-//
-//        // Сериализация блокчейна в массив байтов
-//        byte[] serializedBlockchain = blockchain.toByteArray();
-//
 //        // Десериализация из массива байтов
 //        try {
 //            ProtoBlockchain deserializedBlockchain = ProtoBlockchain.parseFrom(serializedBlockchain);

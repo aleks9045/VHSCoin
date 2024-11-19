@@ -1,20 +1,29 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-option java_package = "Blockchain.Protos";
-option java_outer_classname = "BlockchainProto"; // Внешний класс
+option java_package = "BlockChain.Protos";
+option java_outer_classname = "BlockchainProto";
 
-// Сообщение для блока данных блокчейна
 message ProtoBlock {
   string hash = 1;
   string previousHash = 2;
-  string data = 3;
+  ProtoTransactions data = 3;
   string timestamp = 4;
   int32 difficulty = 5;
   int32 nonce = 6;
 }
 
-// Сообщение для всего блокчейна
 message ProtoBlockchain {
-  repeated ProtoBlock blocks = 1; // Список блоков в блокчейне
+  repeated ProtoBlock blocks = 1;
+}
+
+message ProtoTransaction {
+  string sender = 1;
+  string recipient = 2;
+  string date = 3;
+  double amount = 4;
+  string access = 5;
+}
+message ProtoTransactions {
+  repeated ProtoTransaction transactions = 1;
 }
