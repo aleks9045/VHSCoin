@@ -16,7 +16,7 @@ import java.util.Arrays;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        fork2();
+        fork1();
     }
 
     public static void fork1() {

@@ -8,7 +8,7 @@ message ProtoBlock {
   string hash = 1;
   string previousHash = 2;
   ProtoTransactions data = 3;
-  string timestamp = 4;
+  int64 timestamp = 4;
   int32 difficulty = 5;
   int32 nonce = 6;
 }
@@ -16,7 +16,7 @@ message ProtoBlock {
 message ProtoTransaction {
   string sender = 1;
   string recipient = 2;
-  string timestamp = 3;
+  int64 timestamp = 3;
   int64 amount = 4;
   string access = 5;
 }
