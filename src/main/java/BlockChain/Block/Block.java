@@ -1,10 +1,8 @@
 package BlockChain.Block;
 
-import BlockChain.Transaction.Transaction;
-import BlockChain.Transaction.TransactionPull.TransactionPull;
+import BlockChain.Transactions.Transaction;
+import BlockChain.Transactions.TransactionPull.TransactionPull;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import BlockChain.BlockChainUtils.BlockChainUtils;
 
 public class Block {

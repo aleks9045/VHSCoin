@@ -1,7 +1,7 @@
 package BlockChain;
 
 import BlockChain.Block.Block;
-import BlockChain.Transaction.TransactionPull.TransactionPull;
+import BlockChain.Transactions.TransactionPull.TransactionPull;
 
 import java.util.ArrayList;
 import java.util.List;

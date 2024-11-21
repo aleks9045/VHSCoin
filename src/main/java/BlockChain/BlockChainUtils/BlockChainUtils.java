@@ -1,8 +1,8 @@
 package BlockChain.BlockChainUtils;
 
 import BlockChain.Block.Block;
-import BlockChain.Transaction.Transaction;
-import BlockChain.Transaction.TransactionPull.TransactionPull;
+import BlockChain.Transactions.Transaction;
+import BlockChain.Transactions.TransactionPull.TransactionPull;
 import BlockChain.BlockChain;
 
 import javax.crypto.Cipher;

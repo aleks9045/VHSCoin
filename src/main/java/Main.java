@@ -1,22 +1,18 @@
-import BlockChain.Block.Block;
-import BlockChain.BlockChain;
-import BlockChain.Transaction.Transaction;
-import BlockChain.Transaction.TransactionPull.TransactionPull;
+import BlockChain.Transactions.Transaction;
 
 import BlockChain.WalletGenerator.WalletGenerator;
 import BlockChain.BlockChainUtils.BlockChainUtils;
 
 import Net.Peer;
-import Net.Serializers.BlockchainSerializer;
+import Net.Repository.BlockchainRepository;
+import Net.Serializers.DataSerializer;
 
 import java.security.KeyPair;
-import java.sql.Timestamp;
-import java.util.Arrays;
 
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        fork1();
+        fork2();
     }
 
     public static void fork1() {
@@ -47,7 +43,9 @@ public class Main {
 
         Peer peer1 = new Peer("Peer1");
 
-        peer1.start();
+        peer1.listen();
+        Thread.sleep(500);
+        DataSerializer.serializeBlockchain(BlockchainRepository.getBlockChain());
 //        BlockchainSerializer.createGenesisBlock();
 
 
