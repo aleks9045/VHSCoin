@@ -12,13 +12,15 @@ import Net.Repository.TransactionPullRepository;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class DataSerializer {
-    public static int receiveData(InputStream in) {
+    public static void receiveData(InputStream in) {
         try {
-            int messageType = twoByteArrayToInt(in.readNBytes(2));
-            switch (messageType) {
+            int dataType = twoByteArrayToInt(in.readNBytes(2));
+            switch (dataType) {
                 case 0:
                     break;
                 case 1:
@@ -28,32 +30,44 @@ public class DataSerializer {
                     TransactionPullRepository.setTransactionPull(receiveTransactionPull(in));
                     break;
                 default:
-                    System.out.println("Invalid message type");
+                    System.out.println("Invalid data type");
                     break;
             }
-            return messageType;
+
         } catch (IOException e) {
             System.out.println("Error reading data");
             Thread.currentThread().interrupt();
         }
-        return 0;
     }
     public static byte[][] serializeBlockchain(BlockChain blockChain) {
-//        for (Block block : blockChain.getChain()){
-//            for (Transaction transaction : block.getData().getAllTransactions()){
-//                ProtoTransaction protoTransaction = ProtoTransaction.newBuilder()
-//                        .setSender(transaction.getSender())
-//                        .setRecipient(transaction.getRecipient())
-//                        .setTimestamp(transaction.getTimeStamp())
-//                        .setAmount(transaction.getAmount())
-//                        .setAccess(transaction.getAccess())
-//                        .build();
-//            }
-//            ProtoBlock protoBlock = ProtoBlock.newBuilder()
-//                    .setHash(block.getHash())
-//                    .setData(block.getData())
-//        }
-        return new byte[][]{};
+        List<Block> chain = blockChain.getChain();
+        byte[][] serializedBlockchain = new byte[chain.size()][];
+        for (int i = 0; i < chain.size(); ++i){
+            List<ProtoTransaction> transactionList = new ArrayList<>();
+            for (Transaction transaction : chain.get(i).getData().getAllTransactions()){
+                ProtoTransaction protoTransaction = ProtoTransaction.newBuilder()
+                        .setSender(transaction.getSender())
+                        .setRecipient(transaction.getRecipient())
+                        .setTimestamp(transaction.getTimeStamp())
+                        .setAmount(transaction.getAmount())
+                        .setAccess(transaction.getAccess())
+                        .build();
+                transactionList.add(protoTransaction);
+            }
+            ProtoTransactions protoTransactions = ProtoTransactions.newBuilder()
+                    .addAllTransactions(transactionList)
+                    .build();
+            ProtoBlock protoBlock = ProtoBlock.newBuilder()
+                    .setHash(chain.get(i).getHash())
+                    .setPreviousHash(chain.get(i).getPreviousHash())
+                    .setData(protoTransactions)
+                    .setTimestamp(chain.get(i).getTimeStamp())
+                    .setDifficulty(chain.get(i).getDifficulty())
+                    .setNonce(chain.get(i).getNonce())
+                    .build();
+            serializedBlockchain[i] = protoBlock.toByteArray();
+        }
+        return serializedBlockchain;
     }
     public static BlockChain receiveBlockchain(InputStream in) {
         BlockChain blockChain = new BlockChain();
@@ -124,6 +138,22 @@ public class DataSerializer {
             bytesRead += result;
         }
         return blockData;
+    }
+
+    public static byte[] intToByteArray(int value) {
+        return new byte[]{
+                (byte) (value >> 24),
+                (byte) (value >> 16),
+                (byte) (value >> 8),
+                (byte) value
+        };
+    }
+
+    public static byte[] shortToByteArray(short value) {
+        return new byte[]{
+                (byte) (value >> 8),
+                (byte) value
+        };
     }
 
     public static int fourByteArrayToInt(byte[] bytes) {

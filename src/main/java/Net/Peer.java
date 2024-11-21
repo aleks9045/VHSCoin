@@ -1,19 +1,17 @@
 package Net;
 
-import BlockChain.BlockChain;
+import Net.Repository.BlockchainRepository;
+import Net.Serializers.DataSerializer;
 
-import java.io.*;
-import java.net.Socket;
+import java.util.Arrays;
 import java.util.concurrent.Executors;
 
 
 public class Peer {
-    private final String peerName;
     private final PeerClient peerClient;
 
 
     public Peer(String peerName) {
-        this.peerName = peerName;
         this.peerClient = new PeerClient(
                 peerName,
                 Executors.newSingleThreadExecutor());
@@ -27,8 +25,12 @@ public class Peer {
         }
     }
 
-    public void sendMessage(){
-        System.out.println(peerClient.sendMessage());
+    public void sendBlockchain() {
+        byte[][] bytesBlockchain = DataSerializer.serializeBlockchain(BlockchainRepository.getBlockChain());
+        peerClient.sendData(bytesBlockchain, 1);
+    }
+    public void sendTransactionPull(){
+//        peerClient.sendData(data, 2);
     }
 
     public void stop() {

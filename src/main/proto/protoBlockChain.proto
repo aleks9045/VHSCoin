@@ -20,6 +20,7 @@ message ProtoTransaction {
   int64 amount = 4;
   string access = 5;
 }
+
 message ProtoTransactions {
   repeated ProtoTransaction transactions = 1;
 }

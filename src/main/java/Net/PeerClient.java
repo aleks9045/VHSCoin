@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import Net.Repository.BlockchainRepository;
 import Net.Serializers.DataSerializer;
 
 
@@ -52,42 +53,35 @@ public class PeerClient extends Thread {
         DataSerializer.receiveData(in);
 
         while (!isInterrupted()) {
-            int responseType = DataSerializer.receiveData(in);
-            synchronized (lock) {
-                lockServerResponse = responseType;
-                lock.notify();
-            }
+            DataSerializer.receiveData(in);
         }
         System.out.printf("%s finished... \n", Thread.currentThread().getName());
     }
 
 
-    public int sendMessage() {
+    public void sendData(byte[][] data, int dataType) {
         Thread senderThread = new Thread(() -> {
             try {
-                // Отправляем сообщение
-                out.write("1".getBytes());
-                out.flush();
-                synchronized (lock) {
-                    while (lockServerResponse == null) {
-                        lock.wait();
-                    }
-                }
-                serverResponse = lockServerResponse;
-                lockServerResponse = null;
+                out.write(DataSerializer.shortToByteArray((short) dataType));
+                out.write(DataSerializer.intToByteArray(data.length));
 
-            } catch (IOException | InterruptedException e){
-                System.out.println("Error in sending message");
+                for (byte[] dataBlock : data) {
+                    out.write(DataSerializer.intToByteArray(dataBlock.length));
+                    out.write(dataBlock);
+                    out.flush();
+                }
+            } catch (IOException e) {
+                System.out.println("Error in sending message: " + e.getMessage());
             }
         });
         senderThread.start();
         try {
-            senderThread.join(); // Ожидаем завершения потока
+            senderThread.join();
         } catch (InterruptedException e) {
             System.out.println("Thread interrupted while waiting for response");
         }
-        return serverResponse;
     }
+
     // Закрытие пула потоков при завершении работы
     public void shutdownThreadPool() {
         threadPool.shutdown();

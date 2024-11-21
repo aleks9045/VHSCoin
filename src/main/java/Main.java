@@ -1,3 +1,4 @@
+import BlockChain.Protos.ProtoBlock;
 import BlockChain.Transactions.Transaction;
 
 import BlockChain.WalletGenerator.WalletGenerator;
@@ -8,6 +9,7 @@ import Net.Repository.BlockchainRepository;
 import Net.Serializers.DataSerializer;
 
 import java.security.KeyPair;
+import java.util.Arrays;
 
 
 public class Main {
@@ -42,30 +44,14 @@ public class Main {
     public static void fork2() throws Exception {
 
         Peer peer1 = new Peer("Peer1");
+        Peer peer2 = new Peer("Peer2");
 
         peer1.listen();
-        Thread.sleep(500);
-        DataSerializer.serializeBlockchain(BlockchainRepository.getBlockChain());
+        Thread.sleep(2000);
+        peer2.listen();
+        Thread.sleep(2000);
+        peer1.sendBlockchain();
+        Thread.sleep(2000);
 //        BlockchainSerializer.createGenesisBlock();
-
-
-//        // Десериализация из массива байтов
-//        try {
-//            ProtoBlockchain deserializedBlockchain = ProtoBlockchain.parseFrom(serializedBlockchain);
-//            System.out.println("skjdfhkjfghksjdfg: " + deserializedBlockchain.getBlocksCount());
-//
-//            // Вывод данных каждого блока
-//            for (ProtoBlock block : deserializedBlockchain.getBlocksList()) {
-//                System.out.println("Блок:");
-//                System.out.println("  Хеш: " + block.getHash());
-//                System.out.println("  Предыдущий хеш: " + block.getPreviousHash());
-//                System.out.println("  Данные: " + block.getData());
-//                System.out.println("  Время создания: " + block.getTimestamp());
-//                System.out.println("  Сложность: " + block.getDifficulty());
-//                System.out.println("  Нонс: " + block.getNonce());
-//            }
-//        } catch (Exception e) {
-//            System.out.println(e.getMessage());
-//        }
     }
 }
