@@ -1,9 +1,9 @@
 package Net;
 
 import Net.Repository.BlockchainRepository;
-import Net.Serializers.DataSerializer;
+import Net.Repository.TransactionPullRepository;
+import Net.Serializers.DataHandler;
 
-import java.util.Arrays;
 import java.util.concurrent.Executors;
 
 
@@ -11,9 +11,8 @@ public class Peer {
     private final PeerClient peerClient;
 
 
-    public Peer(String peerName) {
+    public Peer() {
         this.peerClient = new PeerClient(
-                peerName,
                 Executors.newSingleThreadExecutor());
     }
 
@@ -26,16 +25,17 @@ public class Peer {
     }
 
     public void sendBlockchain() {
-        byte[][] bytesBlockchain = DataSerializer.serializeBlockchain(BlockchainRepository.getBlockChain());
+        byte[][] bytesBlockchain = DataHandler.serializeBlockchain(BlockchainRepository.getBlockChain());
         peerClient.sendData(bytesBlockchain, 1);
     }
     public void sendTransactionPull(){
-//        peerClient.sendData(data, 2);
+        byte[][] bytesTransactionPull = DataHandler.serializeTransactionPull(TransactionPullRepository.getTransactionPull());
+        peerClient.sendData(bytesTransactionPull, 2);
     }
 
     public void stop() {
         if (peerClient.isAlive()) {
-            peerClient.shutdownThreadPool(); // Прерывание пула потоков
+            peerClient.shutdownThreadPool();
             peerClient.disconnectFromSS();
             peerClient.interrupt();
         }

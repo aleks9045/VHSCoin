@@ -1,15 +1,11 @@
-import BlockChain.Protos.ProtoBlock;
 import BlockChain.Transactions.Transaction;
 
 import BlockChain.WalletGenerator.WalletGenerator;
 import BlockChain.BlockChainUtils.BlockChainUtils;
 
 import Net.Peer;
-import Net.Repository.BlockchainRepository;
-import Net.Serializers.DataSerializer;
 
 import java.security.KeyPair;
-import java.util.Arrays;
 
 
 public class Main {
@@ -43,15 +39,13 @@ public class Main {
 
     public static void fork2() throws Exception {
 
-        Peer peer1 = new Peer("Peer1");
-        Peer peer2 = new Peer("Peer2");
+        Peer peer1 = new Peer();
 
         peer1.listen();
-        Thread.sleep(2000);
-        peer2.listen();
-        Thread.sleep(2000);
-        peer1.sendBlockchain();
-        Thread.sleep(2000);
-//        BlockchainSerializer.createGenesisBlock();
+//        Thread.sleep(2000);
+//        peer1.sendBlockchain();
+//        Thread.sleep(2000);
+
+//        peer1.stop();
     }
 }

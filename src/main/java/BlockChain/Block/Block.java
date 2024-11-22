@@ -19,7 +19,6 @@ public class Block {
         this.timeStamp = timeStamp;
         this.difficulty = difficulty;
         this.hash = calculateHash();
-        mineBlock();
     }
 
     public void mineBlock() {
@@ -31,7 +30,6 @@ public class Block {
     }
 
     public String calculateHash() {
-        BlockChainUtils utils = new BlockChainUtils();
         StringBuilder inputBuilder = new StringBuilder();
 
         // Добавляем базовую информацию блока
@@ -48,7 +46,7 @@ public class Block {
                     .append(transaction.getAccess());
         }
 
-        return utils.calculateHash(inputBuilder.toString());
+        return BlockChainUtils.calculateHash(inputBuilder.toString());
     }
 
 

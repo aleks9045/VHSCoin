@@ -16,35 +16,37 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class DataSerializer {
+public class DataHandler {
     public static void receiveData(InputStream in) {
         try {
             int dataType = twoByteArrayToInt(in.readNBytes(2));
             switch (dataType) {
-                case 0:
-                    break;
                 case 1:
-                    BlockchainRepository.setBlockChain(receiveBlockchain(in));
+                    BlockchainRepository.setBlockChain(deserializeBlockchain(in));
                     break;
                 case 2:
-                    TransactionPullRepository.setTransactionPull(receiveTransactionPull(in));
+                    TransactionPullRepository.setTransactionPull(deserializeTransactionPull(in));
                     break;
                 default:
                     System.out.println("Invalid data type");
                     break;
             }
-
         } catch (IOException e) {
             System.out.println("Error reading data");
             Thread.currentThread().interrupt();
         }
     }
+
     public static byte[][] serializeBlockchain(BlockChain blockChain) {
+        if (blockChain == null) {
+            return null;
+        }
         List<Block> chain = blockChain.getChain();
         byte[][] serializedBlockchain = new byte[chain.size()][];
-        for (int i = 0; i < chain.size(); ++i){
+        for (int i = 0; i < chain.size(); ++i) {
             List<ProtoTransaction> transactionList = new ArrayList<>();
-            for (Transaction transaction : chain.get(i).getData().getAllTransactions()){
+
+            for (Transaction transaction : chain.get(i).getData().getAllTransactions()) {
                 ProtoTransaction protoTransaction = ProtoTransaction.newBuilder()
                         .setSender(transaction.getSender())
                         .setRecipient(transaction.getRecipient())
@@ -54,9 +56,11 @@ public class DataSerializer {
                         .build();
                 transactionList.add(protoTransaction);
             }
+
             ProtoTransactions protoTransactions = ProtoTransactions.newBuilder()
                     .addAllTransactions(transactionList)
                     .build();
+
             ProtoBlock protoBlock = ProtoBlock.newBuilder()
                     .setHash(chain.get(i).getHash())
                     .setPreviousHash(chain.get(i).getPreviousHash())
@@ -65,24 +69,10 @@ public class DataSerializer {
                     .setDifficulty(chain.get(i).getDifficulty())
                     .setNonce(chain.get(i).getNonce())
                     .build();
+
             serializedBlockchain[i] = protoBlock.toByteArray();
         }
         return serializedBlockchain;
-    }
-    public static BlockChain receiveBlockchain(InputStream in) {
-        BlockChain blockChain = new BlockChain();
-        try {
-            int numOfBlocks = fourByteArrayToInt(in.readNBytes(4));
-            for (int i = 0; i < numOfBlocks; i++) {
-                ProtoBlock protoBlock = ProtoBlock.parseFrom(readBlock(in));
-                TransactionPull transactionPull = TransactionPullFromProtoBlock(protoBlock);
-                Block block = new Block(transactionPull, protoBlock.getPreviousHash(), protoBlock.getTimestamp(), protoBlock.getDifficulty());
-                blockChain.addBlock(block);
-            }
-        } catch (IOException e) {
-            System.out.println("Error while receiving blockchain bytes: " + e.getMessage());
-        }
-        return blockChain;
     }
 
     private static TransactionPull TransactionPullFromProtoBlock(ProtoBlock protoBlock) {
@@ -101,21 +91,52 @@ public class DataSerializer {
         return transactionPull;
     }
 
-    private static TransactionPull receiveTransactionPull(InputStream in) {
+    public static BlockChain deserializeBlockchain(InputStream in) {
+        BlockChain blockChain = new BlockChain();
+        try {
+            int numOfBlocks = fourByteArrayToInt(in.readNBytes(4));
+            for (int i = 0; i < numOfBlocks; i++) {
+                ProtoBlock protoBlock = ProtoBlock.parseFrom(readBlock(in));
+                TransactionPull transactionPull = TransactionPullFromProtoBlock(protoBlock);
+                Block block = new Block(transactionPull, protoBlock.getPreviousHash(), protoBlock.getTimestamp(), protoBlock.getDifficulty());
+                blockChain.addBlock(block);
+            }
+        } catch (IOException e) {
+            System.out.println("Error while receiving blockchain bytes: " + e.getMessage());
+        }
+        return blockChain;
+    }
+    public static byte[][] serializeTransactionPull(TransactionPull transactionPull) {
+        List<Transaction> pull = transactionPull.getAllTransactions();
+        byte[][] serializedPull = new byte[pull.size()][];
+        for (int i = 0; i < pull.size(); ++i) {
+            ProtoTransaction protoTransaction = ProtoTransaction.newBuilder()
+                    .setSender(pull.get(i).getSender())
+                    .setRecipient(pull.get(i).getRecipient())
+                    .setTimestamp(pull.get(i).getTimeStamp())
+                    .setAmount(pull.get(i).getAmount())
+                    .setAccess(pull.get(i).getAccess())
+                    .build();
+            serializedPull[i] = protoTransaction.toByteArray();
+        }
+        return serializedPull;
+    }
+
+    private static TransactionPull deserializeTransactionPull(InputStream in) {
         TransactionPull transactionPull = new TransactionPull();
         try {
             int numOfBlocks = fourByteArrayToInt(in.readNBytes(4));
             for (int i = 0; i < numOfBlocks; i++) {
                 ProtoTransaction protoTransaction = ProtoTransaction.parseFrom(readBlock(in));
                 if (!protoTransaction.getAccess().isEmpty()) {
-                Transaction transaction = new Transaction(
-                        protoTransaction.getSender(),
-                        protoTransaction.getRecipient(),
-                        protoTransaction.getTimestamp(),
-                        protoTransaction.getAmount(),
-                        protoTransaction.getAccess()
-                );
-                transactionPull.addTransaction(transaction);
+                    Transaction transaction = new Transaction(
+                            protoTransaction.getSender(),
+                            protoTransaction.getRecipient(),
+                            protoTransaction.getTimestamp(),
+                            protoTransaction.getAmount(),
+                            protoTransaction.getAccess()
+                    );
+                    transactionPull.addTransaction(transaction);
                 }
             }
         } catch (IOException e) {

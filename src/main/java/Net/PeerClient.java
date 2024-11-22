@@ -1,47 +1,38 @@
 package Net;
 
-
 import java.io.*;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import Net.Repository.BlockchainRepository;
-import Net.Serializers.DataSerializer;
+import Net.Serializers.DataHandler;
 
 
 public class PeerClient extends Thread {
-    private final String peerId;
     private Socket socket;
     private volatile InputStream in;
     private volatile OutputStream out;
     private final ExecutorService threadPool;
+    private int reconnections = 0;
 
-    private final Object lock = new Object();
-    private Integer lockServerResponse = null;
-    private int serverResponse;
-
-    public PeerClient(String peerId, ExecutorService threadPool) {
-        super(peerId + " peerThread");
-        this.peerId = peerId;
+    public PeerClient(ExecutorService threadPool) {
+        super("peerThread");
         // используем пул потоков для управления соединениями
         this.threadPool = threadPool;
     }
 
     private void connectToSS() {
-
         String serverHost = "localhost";
         int serverPort = 5000;
         try {
             socket = new Socket(serverHost, serverPort);
             in = socket.getInputStream();
             out = socket.getOutputStream();
-            Thread.sleep(100);
-            System.out.println("Connected to the signaling server as " + peerId);
+            reconnections = 0;
+            System.out.println("Connected to the signaling server");
         } catch (IOException e) {
-            System.out.println("Error in connect to the signaling server as " + peerId);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            System.out.println("Error in connect to the signaling server");
+            this.checkConnection();
         }
     }
 
@@ -49,36 +40,65 @@ public class PeerClient extends Thread {
     public void run() {
         System.out.printf("%s started... \n", Thread.currentThread().getName());
         this.connectToSS();
-        DataSerializer.receiveData(in);
-        DataSerializer.receiveData(in);
-
+        if (!isInterrupted()) {
+            this.initData();
+        }
         while (!isInterrupted()) {
-            DataSerializer.receiveData(in);
+            DataHandler.receiveData(in);
+
         }
         System.out.printf("%s finished... \n", Thread.currentThread().getName());
     }
 
+    private void initData() {
+        DataHandler.receiveData(in); // Receive blockchain
+        DataHandler.receiveData(in); // Receive transaction pull
+    }
+
 
     public void sendData(byte[][] data, int dataType) {
-        Thread senderThread = new Thread(() -> {
-            try {
-                out.write(DataSerializer.shortToByteArray((short) dataType));
-                out.write(DataSerializer.intToByteArray(data.length));
+        if (!isInterrupted()) {
+            Thread senderThread = new Thread(() -> {
+                try {
+                    out.write(DataHandler.shortToByteArray((short) dataType));
+                    out.write(DataHandler.intToByteArray(data.length));
 
-                for (byte[] dataBlock : data) {
-                    out.write(DataSerializer.intToByteArray(dataBlock.length));
-                    out.write(dataBlock);
-                    out.flush();
+                    for (byte[] dataBlock : data) {
+                        out.write(DataHandler.intToByteArray(dataBlock.length));
+                        out.write(dataBlock);
+                        out.flush();
+                    }
+
+                } catch (IOException e) {
+                    System.out.println("Error in sending data: " + e.getMessage());
                 }
-            } catch (IOException e) {
-                System.out.println("Error in sending message: " + e.getMessage());
+            });
+            senderThread.start();
+            try {
+                senderThread.join();
+            } catch (InterruptedException e) {
+                System.out.println("Thread interrupted while waiting for data transmission");
             }
-        });
-        senderThread.start();
-        try {
-            senderThread.join();
-        } catch (InterruptedException e) {
-            System.out.println("Thread interrupted while waiting for response");
+        }
+    }
+
+    private void checkConnection() {
+        if (socket == null || socket.isClosed() || isInterrupted()) {
+            this.reconnections++;
+            if (this.reconnections >= 6) {
+                System.out.println("Reached the maximum number of reconnections");
+                this.shutdownThreadPool();
+                this.disconnectFromSS();
+                this.interrupt();
+                return;
+            }
+            System.out.println("Trying to reconnect to the signaling server in " + Math.pow(2, reconnections) + " seconds");
+            try {
+                Thread.sleep((long) Math.pow(2, reconnections) * 1000);
+                this.connectToSS();
+            } catch (InterruptedException e) {
+                System.out.println("Error in reconnecting to the signaling server");
+            }
         }
     }
 
