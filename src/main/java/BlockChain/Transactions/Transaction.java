@@ -9,12 +9,12 @@ public class Transaction {
     private long amount;
     private String access;
 
-    public Transaction(String sender, String recipient, long amount, long timeStamp, String privateKey){
+    public Transaction(String sender, String recipient, long amount, long timeStamp, String access){
         this.sender = sender;
         this.recipient = recipient;
         this.timeStamp = timeStamp;
         this.amount = amount;
-        setAccess(privateKey);
+        this.access = access;
     }
 
     public void setAccess(String privateKey) {

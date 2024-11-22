@@ -120,6 +120,18 @@ public class BlockChainUtils {
         }
     }
 
+    public static boolean checkKeys(String publicKey, String privateKey) {
+        try{
+            String str = "Some text for test.";
+            String a = encryptWithPrivateKey(str, privateKey);
+            String b = decryptWithPublicKey(a, publicKey);
+
+            return (b.equals(str));
+        }
+        catch(Exception e){
+            return false;
+        }
+    }
 
     public static String encryptWithPrivateKey(String message, String privateKeyString) throws Exception {
         PrivateKey privateKey = convertStringToPrivateKey(privateKeyString); // Конвертируем строку в PrivateKey
@@ -149,6 +161,7 @@ public class BlockChainUtils {
         PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes); // Создаём спецификацию ключа
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         return keyFactory.generatePrivate(spec); // Генерируем PrivateKey из спецификации
+
     }
 
     public static String calculateHash(String input) {
