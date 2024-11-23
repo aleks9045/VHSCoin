@@ -8,6 +8,8 @@ import BlockChain.WalletGenerator.WalletGenerator;
 
 import java.security.KeyPair;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class User {
@@ -15,11 +17,13 @@ public class User {
     private String publicKey;
     private String privateKey;
     private BlockChainUtils utils;
+    private Long balance;
 
 
     public User() {
         this.privateKey = "";
         this.publicKey = "";
+        this.balance = 0L;
         this.utils = new BlockChainUtils();
         utils.blockChain.addBlock(utils.blockChain.createGenesisBlock());
     }
@@ -44,9 +48,13 @@ public class User {
 
         switch (command.toLowerCase()) {
             case "balance":
+                getBalance();
                 break;
             case "generate":
                 this.generateWallet();
+                break;
+            case "transaction":
+                this.addTransaction();
                 break;
             case "mine":
                 this.mine();
@@ -68,6 +76,38 @@ public class User {
             default:
                 break;
         }
+    }
+
+    private int addTransaction() {
+        if (!publicKey.equals("")) {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Введите данные для совершения транзакции: ");
+            System.out.println("Публичный ключ получателя: ");
+            String recipient = scanner.nextLine().trim();
+            System.out.println("Количество монет: ");
+            Long amount = formatToStorage(scanner.nextLine().trim());
+            while (balance - amount < 0 || amount <= 0){
+                System.out.println("Ваш баланс: " + formatToDisplay(balance) + " VHS");
+                System.out.println("Пожалуйста, введите корректную сумму перевода.");
+                if (scanner.nextLine().trim().equalsIgnoreCase("cancel")){
+                    return 0;
+                }
+                amount = formatToStorage(scanner.nextLine().trim());
+            }
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+            Transaction transaction = new Transaction(publicKey, recipient, amount, timestamp.getTime(), "");
+            transaction.setAccess(privateKey);
+            System.out.println("Транзакция успешно добавлена в очередь");
+            utils.transactionPull.addTransaction(transaction);
+        }
+        else {
+            System.out.println("Требуется аутентификация кошелька. Введите login для входа или generate для генерации нового кошелька.");
+        }
+        return 0;
+    }
+
+    private void getBalance(){
+        System.out.println(formatToDisplay(balance) + " VHS");
     }
 
     private void generateWallet() {
@@ -118,13 +158,23 @@ public class User {
 
     private void mineBlock(){
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        Transaction transaction = new Transaction("miner", publicKey, timestamp.getTime(), 100, "");
+        Transaction transaction = new Transaction("miner", publicKey, 100, timestamp.getTime(), "");
         transaction.setAccess(privateKey);
-        TransactionPull transactionPull = new TransactionPull();
-        transactionPull.addTransaction(transaction);
-        Block block = new Block(transactionPull, utils.blockChain.getLatestBlock().getHash(), timestamp.getTime(), 5);
+        TransactionPull blockTransPull = new TransactionPull();
+        blockTransPull.addTransaction(transaction);
+
+
+        List<Transaction> copy = new ArrayList<>(utils.transactionPull.getAllTransactions());
+        for (Transaction tx : copy) {
+            blockTransPull.addTransaction(tx);
+            utils.transactionPull.removeTransaction(tx);
+        }
+
+        Block block = new Block(blockTransPull, utils.blockChain.getLatestBlock().getHash(), timestamp.getTime(), 5);
         block.mineBlock();
         utils.blockChain.addBlock(block);
+        TransactionPull history = utils.blockChain.getUserTransactions(publicKey);
+        this.balance = utils.blockChain.calculateBalance(publicKey, history);
         System.out.println("+1.00 VHS");
     }
 
@@ -155,4 +205,13 @@ public class User {
     public void setPrivateKey(String privateKey) {
         this.privateKey = privateKey;
     }
+
+    public static String formatToDisplay(long amount) {
+        return String.format("%.2f", amount / 100.0);
+    }
+
+    public static long formatToStorage(String amount) {
+        return (long) (Double.parseDouble(amount) * 100);
+    }
+
 }

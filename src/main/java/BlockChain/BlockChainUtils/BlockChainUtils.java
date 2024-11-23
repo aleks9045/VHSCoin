@@ -14,7 +14,7 @@ import java.util.List;
 
 
 public class BlockChainUtils {
-    private TransactionPull transactionPull;
+    public TransactionPull transactionPull;
     public BlockChain blockChain;
 
     public BlockChainUtils() {
