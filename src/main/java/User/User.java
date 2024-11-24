@@ -1,10 +1,14 @@
 package User;
 
 import BlockChain.Block.Block;
+import BlockChain.BlockChain;
 import BlockChain.BlockChainUtils.BlockChainUtils;
 import BlockChain.Transactions.Transaction;
 import BlockChain.Transactions.TransactionPull.TransactionPull;
 import BlockChain.WalletGenerator.WalletGenerator;
+import Net.Peer;
+import Net.Repository.BlockchainRepository;
+import Net.Repository.TransactionPullRepository;
 
 import java.security.KeyPair;
 import java.sql.Timestamp;
@@ -13,7 +17,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class User {
-
+    private final Peer peer = new Peer();
     private String publicKey;
     private String privateKey;
     private BlockChainUtils utils;
@@ -24,12 +28,27 @@ public class User {
         this.privateKey = "";
         this.publicKey = "";
         this.balance = 0L;
-        this.utils = new BlockChainUtils();
-        utils.blockChain.addBlock(utils.blockChain.createGenesisBlock());
+    }
+
+    public void connect(){
+        peer.listen();
+        peer.waitData();
+        utils = new BlockChainUtils();
+    }
+
+    private void exchangeBlockchains(){
+        BlockchainRepository.setBlockChain(utils.blockChain);
+        peer.sendBlockchain();
+        peer.waitData();
+    }
+
+    private void exchangePulls(){
+        TransactionPullRepository.setTransactionPull(utils.transactionPull);
+        peer.sendTransactionPull();
+        peer.waitData();
     }
 
     public void console() {
-
 
         Scanner scanner = new Scanner(System.in);
         System.out.println("Введите команду (help для справки):");
@@ -59,6 +78,9 @@ public class User {
             case "mine":
                 this.mine();
                 break;
+            case "q":
+                System.out.println("Майнер не запущен");
+                break;
             case "login":
                 Scanner scanner = new Scanner(System.in);
                 System.out.println("Введите публичный ключ:");
@@ -69,8 +91,11 @@ public class User {
                 this.login(prKey, puKey);
             case "help":
                 System.out.println("Доступные команды:");
+                System.out.println("generate - Генерация нового кошелька(вход происходит автоматически)");
+                System.out.println("login - Вход в кошелек");
                 System.out.println("balance [publicKey] - Узнать баланс текущего кошелька или указанного публичного ключа");
-                System.out.println("exit - Выйти из программы");
+                System.out.println("mine - Запуск майнера");
+                System.out.println("q - Остановка майнера");
                 break;
 
             default:
@@ -86,10 +111,10 @@ public class User {
             String recipient = scanner.nextLine().trim();
             System.out.println("Количество монет: ");
             Long amount = formatToStorage(scanner.nextLine().trim());
-            while (balance - amount < 0 || amount <= 0){
+            while (balance - amount < 0 || amount <= 0) {
                 System.out.println("Ваш баланс: " + formatToDisplay(balance) + " VHS");
                 System.out.println("Пожалуйста, введите корректную сумму перевода.");
-                if (scanner.nextLine().trim().equalsIgnoreCase("cancel")){
+                if (scanner.nextLine().trim().equalsIgnoreCase("cancel")) {
                     return 0;
                 }
                 amount = formatToStorage(scanner.nextLine().trim());
@@ -99,19 +124,18 @@ public class User {
             transaction.setAccess(privateKey);
             System.out.println("Транзакция успешно добавлена в очередь");
             utils.transactionPull.addTransaction(transaction);
-        }
-        else {
+            exchangePulls();
+        } else {
             System.out.println("Требуется аутентификация кошелька. Введите login для входа или generate для генерации нового кошелька.");
         }
         return 0;
     }
 
-    private void getBalance(){
+    private void getBalance() {
         System.out.println(formatToDisplay(balance) + " VHS");
     }
 
     private void generateWallet() {
-
         try {
             KeyPair wallet = WalletGenerator.generateWallet();
             String publicKey = WalletGenerator.encodeKeyToBase64(wallet.getPublic().getEncoded());
@@ -127,42 +151,38 @@ public class User {
     }
 
     public void mine() {
-        System.out.println("Майнер успешно запущен.");
-
-        // Поток для выполнения майнинга
         Thread miningThread = new Thread(() -> {
             while (!Thread.currentThread().isInterrupted()) {
-                mineBlock();
+                try {
+                    mineBlock();
+                } catch (InterruptedException e) {
+                    break;
+                }
             }
         });
         miningThread.start();
+        System.out.println("Майнер успешно запущен.");
 
-        // Основной поток для слушания ввода пользователя
         Scanner scanner = new Scanner(System.in);
         while (true) {
             String input = scanner.nextLine();
-            if ("exit".equalsIgnoreCase(input)) {
+            if ("q".equalsIgnoreCase(input)) {
                 miningThread.interrupt();
-                break; // Выход из цикла
+                break;
             }
         }
-
-        try {
-            miningThread.join(); // Ждем завершения майнинг-потока
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        System.out.println("Майнинг остановлен.");
+        System.out.println("Майнер остановлен.");
     }
 
-    private void mineBlock(){
+    private void mineBlock() throws InterruptedException {
+        System.out.println(BlockchainRepository.getBlockChain().getLatestBlock().getHash());
+        if (Thread.currentThread().isInterrupted())
+            throw new InterruptedException("Operation interrupted");
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         Transaction transaction = new Transaction("miner", publicKey, 100, timestamp.getTime(), "");
         transaction.setAccess(privateKey);
         TransactionPull blockTransPull = new TransactionPull();
         blockTransPull.addTransaction(transaction);
-
 
         List<Transaction> copy = new ArrayList<>(utils.transactionPull.getAllTransactions());
         for (Transaction tx : copy) {
@@ -172,21 +192,23 @@ public class User {
 
         Block block = new Block(blockTransPull, utils.blockChain.getLatestBlock().getHash(), timestamp.getTime(), 5);
         block.mineBlock();
+
         utils.blockChain.addBlock(block);
+        exchangeBlockchains();
+
         TransactionPull history = utils.blockChain.getUserTransactions(publicKey);
         this.balance = utils.blockChain.calculateBalance(publicKey, history);
-        System.out.println("+1.00 VHS");
+        System.out.println("+1,00 VHS");
     }
 
     private void login(String puKey, String prKey) {
 
-        if (BlockChainUtils.checkKeys(puKey, prKey )){
+        if (BlockChainUtils.checkKeys(puKey, prKey)) {
             setPrivateKey(prKey);
             setPublicKey(puKey);
             System.out.println("Ключи успешно сохранены.");
-        }
-        else{
-            System.out.println("Ключи не прошли проверку. Попробуйте снова");
+        } else {
+            System.out.println("Ключи не прошли проверку. Попробуйте снова try again");
         }
     }
 
@@ -213,5 +235,4 @@ public class User {
     public static long formatToStorage(String amount) {
         return (long) (Double.parseDouble(amount) * 100);
     }
-
 }

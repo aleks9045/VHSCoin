@@ -24,6 +24,11 @@ public class Peer {
         }
     }
 
+    public void waitData(){
+        while (!BlockchainRepository.isActual());
+        while (!TransactionPullRepository.isActual());
+    }
+
     public void sendBlockchain() {
         byte[][] bytesBlockchain = DataHandler.serializeBlockchain(BlockchainRepository.getBlockChain());
         peerClient.sendData(bytesBlockchain, 1);

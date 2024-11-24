@@ -22,10 +22,14 @@ public class DataHandler {
             int dataType = twoByteArrayToInt(in.readNBytes(2));
             switch (dataType) {
                 case 1:
+                    BlockchainRepository.setActual(false);
                     BlockchainRepository.setBlockChain(deserializeBlockchain(in));
+                    BlockchainRepository.setActual(true);
                     break;
                 case 2:
+                    TransactionPullRepository.setActual(false);
                     TransactionPullRepository.setTransactionPull(deserializeTransactionPull(in));
+                    TransactionPullRepository.setActual(true);
                     break;
                 default:
                     System.out.println("Invalid data type");

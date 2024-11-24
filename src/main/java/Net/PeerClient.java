@@ -21,21 +21,6 @@ public class PeerClient extends Thread {
         this.threadPool = threadPool;
     }
 
-    private void connectToSS() {
-        String serverHost = "localhost";
-        int serverPort = 5000;
-        try {
-            socket = new Socket(serverHost, serverPort);
-            in = socket.getInputStream();
-            out = socket.getOutputStream();
-            reconnections = 0;
-            System.out.println("Connected to the signaling server");
-        } catch (IOException e) {
-            System.out.println("Error in connect to the signaling server");
-            this.checkConnection();
-        }
-    }
-
     @Override
     public void run() {
         System.out.printf("%s started... \n", Thread.currentThread().getName());
@@ -53,6 +38,21 @@ public class PeerClient extends Thread {
     private void initData() {
         DataHandler.receiveData(in); // Receive blockchain
         DataHandler.receiveData(in); // Receive transaction pull
+    }
+
+    private void connectToSS() {
+        String serverHost = "localhost";
+        int serverPort = 5000;
+        try {
+            socket = new Socket(serverHost, serverPort);
+            in = socket.getInputStream();
+            out = socket.getOutputStream();
+            reconnections = 0;
+            System.out.println("Connected to the signaling server");
+        } catch (IOException e) {
+            System.out.println("Error in connect to the signaling server");
+            this.checkConnection();
+        }
     }
 
 

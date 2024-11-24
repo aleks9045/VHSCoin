@@ -4,6 +4,7 @@ import BlockChain.WalletGenerator.WalletGenerator;
 import BlockChain.BlockChainUtils.BlockChainUtils;
 
 import Net.Peer;
+import Net.Repository.BlockchainRepository;
 import User.User;
 
 import java.security.KeyPair;
@@ -17,11 +18,10 @@ public class Main {
     public static void fork1() {
 
         try {
-
             User user = new User();
+            user.connect();
             user.console();
-//
-//
+
         } catch (Exception e) {
             System.err.println("Ошибка: " + e.getMessage());
         }

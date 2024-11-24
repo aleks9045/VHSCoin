@@ -4,6 +4,8 @@ import BlockChain.Block.Block;
 import BlockChain.Transactions.Transaction;
 import BlockChain.Transactions.TransactionPull.TransactionPull;
 import BlockChain.BlockChain;
+import Net.Repository.BlockchainRepository;
+import Net.Repository.TransactionPullRepository;
 
 import javax.crypto.Cipher;
 import java.security.*;
@@ -19,7 +21,8 @@ public class BlockChainUtils {
 
     public BlockChainUtils() {
         this.transactionPull = new TransactionPull();
-        this.blockChain = new BlockChain();
+        this.blockChain = BlockchainRepository.getBlockChain();
+
     }
 
     // Метод обработки нового блокчейна от другого пира

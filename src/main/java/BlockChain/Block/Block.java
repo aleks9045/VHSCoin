@@ -21,9 +21,12 @@ public class Block {
         this.hash = calculateHash();
     }
 
-    public void mineBlock() {
+    public void mineBlock() throws InterruptedException {
         String target = new String(new char[difficulty]).replace('\0', '0');
         while (!hash.substring(0, difficulty).equals(target)) {
+            if (Thread.currentThread().isInterrupted()){
+                throw new InterruptedException("Operation interrupted");
+            }
             nonce++;
             hash = this.calculateHash();
         }
