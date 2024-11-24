@@ -22,7 +22,6 @@ public class BlockChainUtils {
     public BlockChainUtils() {
         this.transactionPull = new TransactionPull();
         this.blockChain = BlockchainRepository.getBlockChain();
-
     }
 
     // Метод обработки нового блокчейна от другого пира

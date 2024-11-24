@@ -79,6 +79,22 @@ public class DataHandler {
         return serializedBlockchain;
     }
 
+    public static BlockChain deserializeBlockchain(InputStream in) {
+        BlockChain blockChain = new BlockChain();
+        try {
+            int numOfBlocks = fourByteArrayToInt(in.readNBytes(4));
+            for (int i = 0; i < numOfBlocks; i++) {
+                ProtoBlock protoBlock = ProtoBlock.parseFrom(readBlock(in));
+                System.out.println(protoBlock);
+                TransactionPull transactionPull = TransactionPullFromProtoBlock(protoBlock);
+                Block block = new Block(transactionPull, protoBlock.getPreviousHash(), protoBlock.getTimestamp(), protoBlock.getDifficulty());
+                blockChain.addBlock(block);
+            }
+        } catch (IOException e) {
+            System.out.println("Error while receiving blockchain bytes: " + e.getMessage());
+        }
+        return blockChain;
+    }
     private static TransactionPull TransactionPullFromProtoBlock(ProtoBlock protoBlock) {
         ProtoTransactions protoBlockData = protoBlock.getData();
         TransactionPull transactionPull = new TransactionPull();
@@ -95,21 +111,6 @@ public class DataHandler {
         return transactionPull;
     }
 
-    public static BlockChain deserializeBlockchain(InputStream in) {
-        BlockChain blockChain = new BlockChain();
-        try {
-            int numOfBlocks = fourByteArrayToInt(in.readNBytes(4));
-            for (int i = 0; i < numOfBlocks; i++) {
-                ProtoBlock protoBlock = ProtoBlock.parseFrom(readBlock(in));
-                TransactionPull transactionPull = TransactionPullFromProtoBlock(protoBlock);
-                Block block = new Block(transactionPull, protoBlock.getPreviousHash(), protoBlock.getTimestamp(), protoBlock.getDifficulty());
-                blockChain.addBlock(block);
-            }
-        } catch (IOException e) {
-            System.out.println("Error while receiving blockchain bytes: " + e.getMessage());
-        }
-        return blockChain;
-    }
     public static byte[][] serializeTransactionPull(TransactionPull transactionPull) {
         List<Transaction> pull = transactionPull.getAllTransactions();
         byte[][] serializedPull = new byte[pull.size()][];

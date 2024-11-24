@@ -41,7 +41,7 @@ public class PeerClient extends Thread {
     }
 
     private void connectToSS() {
-        String serverHost = "localhost";
+        String serverHost = "89.46.131.17";
         int serverPort = 5000;
         try {
             socket = new Socket(serverHost, serverPort);

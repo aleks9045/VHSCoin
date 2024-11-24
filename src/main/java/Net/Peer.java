@@ -30,6 +30,7 @@ public class Peer {
     }
 
     public void sendBlockchain() {
+        
         byte[][] bytesBlockchain = DataHandler.serializeBlockchain(BlockchainRepository.getBlockChain());
         peerClient.sendData(bytesBlockchain, 1);
     }

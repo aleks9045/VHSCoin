@@ -175,7 +175,6 @@ public class User {
     }
 
     private void mineBlock() throws InterruptedException {
-        System.out.println(BlockchainRepository.getBlockChain().getLatestBlock().getHash());
         if (Thread.currentThread().isInterrupted())
             throw new InterruptedException("Operation interrupted");
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
