@@ -18,7 +18,9 @@ public class BlockChain {
     // Метод для создания генезис-блока
     public Block createGenesisBlock() {
         TransactionPull pull = new TransactionPull();
-        return new Block(pull, "0", 0, 0);
+        Block block = new Block(pull, "0", 0, 0, "", 0);
+        block.setHash(block.calculateHash());
+        return block;
     }
 
     // Метод для получения последнего блока
@@ -34,6 +36,14 @@ public class BlockChain {
     public void addBlock(Block block) {
         chain.add(block);
     }
+
+    public void display (){
+        for (Block block : chain) {
+            System.out.println("Hash: " + block.getHash());
+            System.out.println("Previous hash: " + block.getPreviousHash());
+            System.out.println("_________________________________________");
+        }
+    };
 
     // Метод для проверки целостности блокчейна
     public boolean isChainValid() {

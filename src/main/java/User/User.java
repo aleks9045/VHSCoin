@@ -28,18 +28,28 @@ public class User {
         this.privateKey = "";
         this.publicKey = "";
         this.balance = 0L;
+        utils = new BlockChainUtils();
+        Block genesis = utils.blockChain.createGenesisBlock();
+        genesis.setHash(genesis.calculateHash());
+        utils.blockChain.addBlock(genesis);
     }
 
     public void connect(){
         peer.listen();
         peer.waitData();
-        utils = new BlockChainUtils();
+        utils.blockChain = BlockchainRepository.getBlockChain();
     }
 
     private void exchangeBlockchains(){
+        utils.processIncomingBlockChain(BlockchainRepository.getBlockChain());
+//        System.out.println(utils.blockChain.isChainValid());
+//        for (Block b : utils.blockChain.getChain()){
+//            System.out.println(b.getHash().equals(b.calculateHash()));
+//        }
         BlockchainRepository.setBlockChain(utils.blockChain);
+
         peer.sendBlockchain();
-        peer.waitData();
+
     }
 
     private void exchangePulls(){
@@ -124,7 +134,7 @@ public class User {
             transaction.setAccess(privateKey);
             System.out.println("Транзакция успешно добавлена в очередь");
             utils.transactionPull.addTransaction(transaction);
-            exchangePulls();
+//            exchangePulls();
         } else {
             System.out.println("Требуется аутентификация кошелька. Введите login для входа или generate для генерации нового кошелька.");
         }
@@ -151,6 +161,7 @@ public class User {
     }
 
     public void mine() {
+
         Thread miningThread = new Thread(() -> {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
@@ -175,7 +186,6 @@ public class User {
     }
 
     private void mineBlock() throws InterruptedException {
-        System.out.println(BlockchainRepository.getBlockChain().getLatestBlock().getHash());
         if (Thread.currentThread().isInterrupted())
             throw new InterruptedException("Operation interrupted");
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
@@ -190,7 +200,7 @@ public class User {
             utils.transactionPull.removeTransaction(tx);
         }
 
-        Block block = new Block(blockTransPull, utils.blockChain.getLatestBlock().getHash(), timestamp.getTime(), 5);
+        Block block = new Block(blockTransPull, utils.blockChain.getLatestBlock().getHash(), timestamp.getTime(), 5, "", 0);
         block.mineBlock();
 
         utils.blockChain.addBlock(block);
@@ -198,7 +208,7 @@ public class User {
 
         TransactionPull history = utils.blockChain.getUserTransactions(publicKey);
         this.balance = utils.blockChain.calculateBalance(publicKey, history);
-        System.out.println("+1,00 VHS");
+        System.out.println("+1,00 VHS, balance: " + formatToDisplay(this.balance) + " VHS");
     }
 
     private void login(String puKey, String prKey) {

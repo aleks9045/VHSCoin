@@ -13,15 +13,17 @@ public class Block {
     private int difficulty;
     private int nonce;
 
-    public Block(TransactionPull data, String previousHash, long timeStamp, int difficulty) {
+    public Block(TransactionPull data, String previousHash, long timeStamp, int difficulty, String hash, int nonce) {
         this.data = data;
         this.previousHash = previousHash;
         this.timeStamp = timeStamp;
         this.difficulty = difficulty;
-        this.hash = calculateHash();
+        this.hash = hash;
+        this.nonce = nonce;
     }
 
     public void mineBlock() throws InterruptedException {
+        this.hash = calculateHash();
         String target = new String(new char[difficulty]).replace('\0', '0');
         while (!hash.substring(0, difficulty).equals(target)) {
             if (Thread.currentThread().isInterrupted()){
@@ -63,6 +65,7 @@ public class Block {
     public String getHash() {
         return hash;
     }
+    public void setHash(String hash) {}
 
     public String getPreviousHash() {
         return previousHash;
