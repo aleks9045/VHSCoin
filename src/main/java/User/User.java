@@ -257,3 +257,4 @@ public class User {
         return (long) (Double.parseDouble(amount) * 100);
     }
 }
+
