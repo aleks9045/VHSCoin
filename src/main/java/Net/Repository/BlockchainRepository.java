@@ -9,14 +9,16 @@ public class BlockchainRepository {
     public static synchronized BlockChain getBlockChain() {
         return blockChain;
     }
+
     public static synchronized void setBlockChain(BlockChain newBlockChain) {
         blockChain = newBlockChain;
     }
 
-    public static boolean isActual() {
+    public synchronized static boolean isActual() {
         return actual;
     }
-    public static void setActual(boolean actual) {
+
+    public synchronized static void setActual(boolean actual) {
         BlockchainRepository.actual = actual;
     }
 }

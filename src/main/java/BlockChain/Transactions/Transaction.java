@@ -20,8 +20,8 @@ public class Transaction {
     public void setAccess(String privateKey) {
         try {
             BlockChainUtils utils = new BlockChainUtils();
-            String hash = utils.calculateHash(this.getFeilds());
-            access = utils.encryptWithPrivateKey(hash, privateKey);
+            String hash = BlockChainUtils.calculateHash(this.getFeilds());
+            access = BlockChainUtils.encryptWithPrivateKey(hash, privateKey);
         }
         catch (Exception e) {
             e.printStackTrace();

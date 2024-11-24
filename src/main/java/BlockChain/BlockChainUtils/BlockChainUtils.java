@@ -4,8 +4,6 @@ import BlockChain.Block.Block;
 import BlockChain.Transactions.Transaction;
 import BlockChain.Transactions.TransactionPull.TransactionPull;
 import BlockChain.BlockChain;
-import Net.Repository.BlockchainRepository;
-import Net.Repository.TransactionPullRepository;
 
 import javax.crypto.Cipher;
 import java.security.*;
@@ -21,12 +19,13 @@ public class BlockChainUtils {
 
     public BlockChainUtils() {
         this.transactionPull = new TransactionPull();
-        this.blockChain = BlockchainRepository.getBlockChain();
+        this.blockChain = new BlockChain();
+
     }
 
     // Метод обработки нового блокчейна от другого пира
     public void processIncomingBlockChain(BlockChain incomingBlockChain) {
-        // Проверяем целостность нового блокчейна
+
         if (!incomingBlockChain.isChainValid()) {
             System.out.println("Incoming blockchain is invalid.");
             return;
@@ -184,3 +183,4 @@ public class BlockChainUtils {
         }
     }
 }
+

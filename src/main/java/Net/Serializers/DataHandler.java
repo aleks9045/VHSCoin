@@ -12,6 +12,8 @@ import Net.Repository.TransactionPullRepository;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -79,22 +81,6 @@ public class DataHandler {
         return serializedBlockchain;
     }
 
-    public static BlockChain deserializeBlockchain(InputStream in) {
-        BlockChain blockChain = new BlockChain();
-        try {
-            int numOfBlocks = fourByteArrayToInt(in.readNBytes(4));
-            for (int i = 0; i < numOfBlocks; i++) {
-                ProtoBlock protoBlock = ProtoBlock.parseFrom(readBlock(in));
-                System.out.println(protoBlock);
-                TransactionPull transactionPull = TransactionPullFromProtoBlock(protoBlock);
-                Block block = new Block(transactionPull, protoBlock.getPreviousHash(), protoBlock.getTimestamp(), protoBlock.getDifficulty());
-                blockChain.addBlock(block);
-            }
-        } catch (IOException e) {
-            System.out.println("Error while receiving blockchain bytes: " + e.getMessage());
-        }
-        return blockChain;
-    }
     private static TransactionPull TransactionPullFromProtoBlock(ProtoBlock protoBlock) {
         ProtoTransactions protoBlockData = protoBlock.getData();
         TransactionPull transactionPull = new TransactionPull();
@@ -102,8 +88,8 @@ public class DataHandler {
             Transaction transaction = new Transaction(
                     protoTransaction.getSender(),
                     protoTransaction.getRecipient(),
-                    protoTransaction.getTimestamp(),
                     protoTransaction.getAmount(),
+                    protoTransaction.getTimestamp(),
                     protoTransaction.getAccess()
             );
             transactionPull.addTransaction(transaction);
@@ -111,6 +97,23 @@ public class DataHandler {
         return transactionPull;
     }
 
+    public static BlockChain deserializeBlockchain(InputStream in){
+        BlockChain blockChain = new BlockChain();
+        try {
+            int numOfBlocks = fourByteArrayToInt(in.readNBytes(4));
+            for (int i = 0; i < numOfBlocks; i++) {
+                ProtoBlock protoBlock = ProtoBlock.parseFrom(readBlock(in));
+                TransactionPull transactionPull = TransactionPullFromProtoBlock(protoBlock);
+                Block block = new Block(transactionPull, protoBlock.getPreviousHash(), protoBlock.getTimestamp(), protoBlock.getDifficulty(), protoBlock.getHash(), protoBlock.getNonce());
+
+                blockChain.addBlock(block);
+            }
+        } catch (IOException e) {
+            System.out.println("Error while receiving blockchain bytes: " + e.getMessage());
+        }
+
+        return blockChain;
+    }
     public static byte[][] serializeTransactionPull(TransactionPull transactionPull) {
         List<Transaction> pull = transactionPull.getAllTransactions();
         byte[][] serializedPull = new byte[pull.size()][];
@@ -137,11 +140,12 @@ public class DataHandler {
                     Transaction transaction = new Transaction(
                             protoTransaction.getSender(),
                             protoTransaction.getRecipient(),
-                            protoTransaction.getTimestamp(),
                             protoTransaction.getAmount(),
+                            protoTransaction.getTimestamp(),
                             protoTransaction.getAccess()
                     );
                     transactionPull.addTransaction(transaction);
+
                 }
             }
         } catch (IOException e) {
@@ -209,3 +213,4 @@ public class DataHandler {
         System.out.println(Arrays.toString(serializedblock1));
     }
 }
+
