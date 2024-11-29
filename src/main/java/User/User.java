@@ -82,6 +82,9 @@ public class User {
             case "mine":
                 this.mine();
                 break;
+            case "blockchain":
+                this.displayBlockChain();
+                break;
             case "q":
                 System.out.println("Майнер не запущен");
                 break;
@@ -105,6 +108,11 @@ public class User {
             default:
                 break;
         }
+    }
+
+    private void displayBlockChain() {
+        exchangeBlockchains();
+        utils.blockChain.display();
     }
 
     private int addTransaction() {
@@ -136,6 +144,7 @@ public class User {
     }
 
     private void getBalance() {
+        exchangeBlockchains();
         Scanner scanner = new Scanner(System.in);
         System.out.println("Введите публичный ключ (если хотите увидеть свой баланс, нажмите Enter:");
         String requestKey = scanner.nextLine().trim();

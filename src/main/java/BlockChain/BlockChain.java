@@ -41,6 +41,15 @@ public class BlockChain {
         for (Block block : chain) {
             System.out.println("Hash: " + block.getHash());
             System.out.println("Previous hash: " + block.getPreviousHash());
+            System.out.println("Transactions:");
+            for (Transaction transaction : block.getData().getAllTransactions()){
+                System.out.print("    ");
+                System.out.println(transaction.getSender());
+                System.out.print("    ");
+                System.out.println(transaction.getRecipient());
+                System.out.print("    ");
+                System.out.println(transaction.getAmount());
+            }
             System.out.println("_________________________________________");
         }
     };
