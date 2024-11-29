@@ -105,7 +105,7 @@ public class BlockChainUtils {
         }
     }
 
-    private void removeProcessedTransactionsFromPool() {
+    public void removeProcessedTransactionsFromPool() {
         List<Block> chain = blockChain.getChain();
         List<Transaction> allTransactions = transactionPull.getAllTransactions();
 

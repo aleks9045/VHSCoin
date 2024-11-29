@@ -7,7 +7,7 @@ import java.util.List;
 
 public class TransactionPull {
     // Хранилище транзакций
-    private List<Transaction> transactions;
+    private  List<Transaction> transactions;
 
     // Конструктор
     public TransactionPull() {
@@ -34,13 +34,22 @@ public class TransactionPull {
     }
 
     // Метод для удаления транзакции
-    public boolean removeTransaction(Transaction transaction) {
-        return transactions.remove(transaction);
+    public void removeTransaction(Transaction transaction) {
+        for (Transaction transaction2 : transactions) {
+            if (transaction.equals(transaction2)) {
+                System.out.println("Sfafas");
+                transactions.remove(transaction);
+            }
+        }
     }
 
     // Метод для получения всех транзакций
     public List<Transaction> getAllTransactions() {
         return transactions;
+    }
+
+    public void setAllTransactions(List<Transaction> newTransactions) {
+        transactions = newTransactions;
     }
 
     // Метод для вывода всех транзакций в консоль

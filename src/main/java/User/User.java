@@ -13,6 +13,7 @@ import Net.Repository.TransactionPullRepository;
 import java.security.KeyPair;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 
@@ -50,6 +51,7 @@ public class User {
     private void exchangePulls(){
         peer.waitData();
         utils.transactionPull.processIncomingTransactionPull(TransactionPullRepository.getTransactionPull());
+        utils.removeProcessedTransactionsFromPool();
         TransactionPullRepository.setTransactionPull(utils.transactionPull);
         peer.sendTransactionPull();
     }
@@ -211,8 +213,12 @@ public class User {
         List<Transaction> copy = new ArrayList<>(utils.transactionPull.getAllTransactions());
         for (Transaction tx : copy) {
             blockTransPull.addTransaction(tx);
-            utils.transactionPull.removeTransaction(tx);
         }
+        TransactionPull transactionPullCopy = new TransactionPull();
+        for (Transaction tx : blockTransPull.getAllTransactions()) {
+            transactionPullCopy.removeTransaction(tx);
+        }
+        utils.transactionPull.setAllTransactions(transactionPullCopy.getAllTransactions());
 
         Block block = new Block(blockTransPull, utils.blockChain.getLatestBlock().getHash(), timestamp.getTime(), 5, "", 0);
         block.mineBlock();
