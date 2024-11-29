@@ -24,3 +24,7 @@ message ProtoTransaction {
 message ProtoTransactions {
   repeated ProtoTransaction transactions = 1;
 }
+
+message ProtoBlockchain {
+  repeated ProtoBlock blocks = 1;
+}
