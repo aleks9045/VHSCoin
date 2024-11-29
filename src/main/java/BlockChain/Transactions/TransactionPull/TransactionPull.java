@@ -37,7 +37,7 @@ public class TransactionPull {
     public void removeTransaction(Transaction transaction) {
         for (Transaction transaction2 : transactions) {
             if (transaction.equals(transaction2)) {
-                System.out.println("Sfafas");
+                displayTransactions();
                 transactions.remove(transaction);
             }
         }
@@ -46,6 +46,15 @@ public class TransactionPull {
     // Метод для получения всех транзакций
     public List<Transaction> getAllTransactions() {
         return transactions;
+    }
+
+    public void displayTransactions() {
+        for (Transaction transaction : transactions) {
+            System.out.println(transaction.getSender());
+            System.out.println(transaction.getRecipient());
+            System.out.println(transaction.getAmount());
+            System.out.println(transaction.getTimeStamp());
+        }
     }
 
     public void setAllTransactions(List<Transaction> newTransactions) {

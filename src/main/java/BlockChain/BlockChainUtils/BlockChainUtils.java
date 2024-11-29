@@ -106,20 +106,19 @@ public class BlockChainUtils {
     }
 
     public void removeProcessedTransactionsFromPool() {
-        List<Block> chain = blockChain.getChain();
-        List<Transaction> allTransactions = transactionPull.getAllTransactions();
+        List<Block> chain = blockChain.getChain(); // Получаем цепочку блоков
 
         for (Block block : chain) {
-            // Получаем все транзакции из блока
+            // Получаем все транзакции из текущего блока
             List<Transaction> blockTransactions = block.getData().getAllTransactions();
 
-            // Удаляем все транзакции блока из пула
+            // Удаляем транзакции блока из пула, используя removeTransaction
             blockTransactions.forEach(transaction ->
-                    allTransactions.removeIf(existingTransaction ->
-                            existingTransaction.equals(transaction))
+                transactionPull.removeTransaction(transaction)
             );
         }
     }
+
 
     public static boolean checkKeys(String publicKey, String privateKey) {
         try{
