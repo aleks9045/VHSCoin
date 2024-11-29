@@ -41,25 +41,20 @@ public class User {
     }
 
     private void exchangeBlockchains(){
+        peer.waitData();
         utils.processIncomingBlockChain(BlockchainRepository.getBlockChain());
-//        System.out.println(utils.blockChain.isChainValid());
-//        for (Block b : utils.blockChain.getChain()){
-//            System.out.println(b.getHash().equals(b.calculateHash()));
-//        }
         BlockchainRepository.setBlockChain(utils.blockChain);
-
         peer.sendBlockchain();
-
     }
 
     private void exchangePulls(){
+        peer.waitData();
+        utils.transactionPull.processIncomingTransactionPull(TransactionPullRepository.getTransactionPull());
         TransactionPullRepository.setTransactionPull(utils.transactionPull);
         peer.sendTransactionPull();
-        peer.waitData();
     }
 
     public void console() {
-
         Scanner scanner = new Scanner(System.in);
         System.out.println("Введите команду (help для справки):");
         while (true) {
@@ -67,7 +62,6 @@ public class User {
             String input = scanner.nextLine().trim();
             handleCommand(input);
         }
-
     }
 
     private void handleCommand(String input) {
@@ -134,7 +128,7 @@ public class User {
             transaction.setAccess(privateKey);
             System.out.println("Транзакция успешно добавлена в очередь");
             utils.transactionPull.addTransaction(transaction);
-//            exchangePulls();
+            exchangePulls();
         } else {
             System.out.println("Требуется аутентификация кошелька. Введите login для входа или generate для генерации нового кошелька.");
         }
@@ -216,6 +210,7 @@ public class User {
 
         utils.blockChain.addBlock(block);
         exchangeBlockchains();
+        exchangePulls();
 
         TransactionPull history = utils.blockChain.getUserTransactions(publicKey);
         this.balance = utils.blockChain.calculateBalance(publicKey, history);

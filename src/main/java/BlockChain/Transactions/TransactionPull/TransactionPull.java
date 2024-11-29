@@ -19,6 +19,20 @@ public class TransactionPull {
         transactions.add(transaction);
     }
 
+    public void processIncomingTransactionPull(TransactionPull transactionPull) {
+        TransactionPull transactionPullCopy = transactionPull;
+        for (Transaction transaction : transactionPullCopy.getAllTransactions()) {
+            for (Transaction transaction2 : transactions) {
+                if (transaction.equals(transaction2)) {
+                    transactionPull.removeTransaction(transaction);
+                }
+            }
+        }
+        for (Transaction transaction : transactionPull.getAllTransactions()) {
+            this.addTransaction(transaction);
+        }
+    }
+
     // Метод для удаления транзакции
     public boolean removeTransaction(Transaction transaction) {
         return transactions.remove(transaction);
