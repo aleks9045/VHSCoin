@@ -21,26 +21,16 @@ public class TransactionPull {
 
     public void processIncomingTransactionPull(TransactionPull transactionPull) {
         TransactionPull transactionPullCopy = transactionPull;
-        for (Transaction transaction : transactionPullCopy.getAllTransactions()) {
-            for (Transaction transaction2 : transactions) {
-                if (transaction.equals(transaction2)) {
-                    transactionPull.removeTransaction(transaction);
-                }
+        for (Transaction transactionCopy : transactionPullCopy.getAllTransactions()) {
+            if (!transactionPull.getAllTransactions().contains(transactionCopy)) {
+                transactionPull.addTransaction(transactionCopy);
             }
-        }
-        for (Transaction transaction : transactionPull.getAllTransactions()) {
-            this.addTransaction(transaction);
         }
     }
 
     // Метод для удаления транзакции
     public void removeTransaction(Transaction transaction) {
-        for (Transaction transaction2 : transactions) {
-            if (transaction.equals(transaction2)) {
-                displayTransactions();
-                transactions.remove(transaction);
-            }
-        }
+        transactions.remove(transaction);
     }
 
     // Метод для получения всех транзакций
