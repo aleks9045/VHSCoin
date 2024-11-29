@@ -60,7 +60,7 @@ public class PeerClient extends Thread {
         if (!isInterrupted()) {
             Thread senderThread = new Thread(() -> {
                 try {
-                    out.write(DataHandler.shortToByteArray((short) dataType));
+                    out.write((byte) dataType);
                     out.write(DataHandler.intToByteArray(data.length));
 
                     for (byte[] dataBlock : data) {

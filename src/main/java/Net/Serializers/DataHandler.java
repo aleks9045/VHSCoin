@@ -64,6 +64,7 @@ public class DataHandler {
                     .addAllTransactions(transactionList)
                     .build();
 
+
             ProtoBlock protoBlock = ProtoBlock.newBuilder()
                     .setHash(chain.get(i).getHash())
                     .setPreviousHash(chain.get(i).getPreviousHash())
